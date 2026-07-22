@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านกวยจั๊บป้านิด | สั่งอาหาร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+  :root{
+    --broth:#1c1410;
+    --broth-2:#2b1f18;
+    --cream:#f4ead9;
+    --cream-2:#fffaf1;
+    --chili:#c0421f;
+    --chili-dark:#8f2e14;
+    --gold:#c9932e;
+    --herb:#5b7052;
+    --text-soft:#8a7a68;
+    --line: rgba(244,234,217,0.14);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--broth);
+    color:var(--cream);
+    font-family:'Sarabun', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--chili); color:var(--cream-2);}
+
+  /* ---------- steam texture bg ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image:radial-gradient(circle at 20% 30%, #fff 0.5px, transparent 0.5px),
+                      radial-gradient(circle at 70% 60%, #fff 0.5px, transparent 0.5px);
+    background-size: 3px 3px, 5px 5px;
+  }
+
+  .wrap{ max-width:560px; margin:0 auto; position:relative; z-index:1; padding-bottom:120px;}
+
+  header.top{
+    padding:38px 24px 24px;
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:10px;
+  }
+  h1.shop{
+    font-family:'Mitr', sans-serif; font-weight:700;
+    font-size:38px; margin:0; line-height:1.15;
+    color:var(--cream-2);
+  }
+  .shop-sub{
+    margin-top:8px; color:var(--text-soft); font-size:14.5px;
+  }
+
+  /* ---------- hero bowl ---------- */
+  .hero{
+    display:flex; justify-content:center; padding:14px 0 6px;
+  }
+  .bowl-hero{ width:180px; height:auto; }
+  @keyframes rise{
+    0%{ transform:translateY(0) scaleX(1); opacity:0.55; }
+    50%{ transform:translateY(-14px) scaleX(1.15); opacity:0.15;}
+    100%{ transform:translateY(-30px) scaleX(0.9); opacity:0;}
+  }
+  .steam{ transform-origin:bottom center; animation: rise 3.2s ease-in-out infinite; }
+  .steam.s2{ animation-delay:0.9s; }
+  .steam.s3{ animation-delay:1.7s; }
+
+  section.menu{ padding:18px 20px 0; }
+  .menu-title{
+    font-family:'Mitr', sans-serif; font-size:15px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--gold); margin:0 0 14px 4px;
+  }
+
+  .size-card{
+    display:flex; align-items:center; gap:14px;
+    background: linear-gradient(180deg, var(--broth-2), var(--broth-2));
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding:14px 16px; margin-bottom:12px;
+  }
+  .bowl-icon{ flex:0 0 auto; }
+  .size-info{ flex:1; min-width:0; }
+  .size-name{ font-family:'Mitr'; font-weight:600; font-size:18px; color:var(--cream-2); }
+  .size-desc{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+  .size-price{ font-size:14px; color:var(--gold); margin-top:6px; font-weight:600; }
+
+  .stepper{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .stepper button{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--cream);
+    font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.15s, transform 0.1s;
+  }
+  .stepper button:active{ transform:scale(0.9); }
+  .stepper button.plus{ background:var(--chili); border-color:var(--chili); color:var(--cream-2); }
+  .stepper .qty{ width:20px; text-align:center; font-weight:600; font-family:'Mitr'; }
+
+  .fields{ padding:22px 20px 0; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; color:var(--text-soft); margin-bottom:6px; letter-spacing:0.03em; }
+  .field input, .field textarea{
+    width:100%; background:var(--broth-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; color:var(--cream-2); font-family:'Sarabun';
+    font-size:15px; outline:none;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--gold); }
+  .field textarea{ resize:vertical; min-height:56px; }
+
+  /* ---------- sticky cart bar ---------- */
+  .cartbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:5;
+    background:var(--broth-2); border-top:1px solid var(--line);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+  }
+  .cartbar-inner{ max-width:560px; margin:0 auto; display:flex; align-items:center; gap:14px; }
+  .cart-total{ flex:0 0 auto; }
+  .cart-total .label{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.1em; }
+  .cart-total .amt{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--gold); }
+  .order-btn{
+    flex:1; background:var(--chili); color:var(--cream-2); border:none; border-radius:14px;
+    padding:15px 18px; font-family:'Mitr'; font-weight:600; font-size:16px; cursor:pointer;
+    transition:transform 0.1s, background 0.15s;
+  }
+  .order-btn:active{ transform:scale(0.98); }
+  .order-btn:disabled{ background:#4a3a30; color:var(--text-soft); cursor:not-allowed; }
+
+  /* ---------- confirm modal ---------- */
+  .modal-veil{
+    position:fixed; inset:0; background:rgba(10,7,5,0.72); z-index:10;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-veil.show{ display:flex; }
+  .modal{
+    background:var(--cream-2); color:var(--broth); border-radius:20px; padding:30px 26px;
+    max-width:360px; width:100%; text-align:center;
+  }
+  .modal .num{
+    font-family:'Mitr'; font-weight:700; font-size:34px; color:var(--chili); margin:10px 0 4px;
+  }
+  .modal .close-btn{
+    margin-top:20px; background:var(--broth); color:var(--cream-2); border:none;
+    border-radius:12px; padding:12px 20px; font-family:'Mitr'; font-weight:600; cursor:pointer; width:100%;
+  }
+
+  .empty-note{ text-align:center; color:var(--text-soft); font-size:13px; padding:6px 20px 0;}
+
+  /* =================== ADMIN =================== */
+  body.admin-mode{ background:#100c09; }
+  .admin-wrap{ max-width:720px; margin:0 auto; padding:26px 18px 60px; position:relative; z-index:1; }
+  .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:10px; flex-wrap:wrap;}
+  .admin-header h1{ font-family:'Mitr'; font-size:22px; margin:0; color:var(--cream-2);}
+  .admin-header .sub{ color:var(--text-soft); font-size:12.5px; }
+  .btn-ghost{
+    background:transparent; border:1px solid var(--line); color:var(--cream);
+    border-radius:10px; padding:9px 14px; font-family:'Sarabun'; font-size:13px; cursor:pointer;
+  }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+
+  .pin-screen{ max-width:320px; margin:80px auto; text-align:center; }
+  .pin-screen input{
+    width:100%; text-align:center; letter-spacing:0.5em; font-size:22px;
+    background:var(--broth-2); border:1px solid var(--line); border-radius:12px;
+    padding:14px; color:var(--cream-2); margin-top:16px; font-family:'Mitr';
+  }
+  .pin-screen button{
+    margin-top:14px; width:100%; background:var(--chili); color:var(--cream-2); border:none;
+    border-radius:12px; padding:13px; font-family:'Mitr'; font-weight:600; cursor:pointer;
+  }
+  .pin-error{ color:var(--chili); font-size:12.5px; margin-top:10px; min-height:16px; }
+
+  .qr-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:16px;
+    padding:18px; display:flex; gap:16px; align-items:center; margin-bottom:22px; flex-wrap:wrap;
+  }
+  .qr-card canvas{ border-radius:10px; background:#fff; padding:6px; }
+  .qr-card .link-text{ font-size:12px; color:var(--text-soft); word-break:break-all; margin-top:6px; }
+  .qr-card .qr-title{ font-family:'Mitr'; font-size:14px; color:var(--gold); margin-bottom:4px;}
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat{
+    flex:1; min-width:100px; background:var(--broth-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px;
+  }
+  .stat .n{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--cream-2); }
+  .stat .l{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.08em; }
+
+  .order-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:12px; position:relative;
+  }
+  .order-card.status-new{ border-left:4px solid var(--chili); }
+  .order-card.status-preparing{ border-left:4px solid var(--gold); }
+  .order-card.status-done{ border-left:4px solid var(--herb); opacity:0.6; }
+  .order-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .order-id{ font-family:'Mitr'; font-weight:600; font-size:15px; color:var(--cream-2); }
+  .order-time{ font-size:11.5px; color:var(--text-soft); margin-top:2px;}
+  .order-table{ font-size:13px; color:var(--gold); margin-top:4px; }
+  .order-items{ margin:10px 0; font-size:14px; }
+  .order-items div{ display:flex; justify-content:space-between; padding:3px 0; color:var(--cream); }
+  .order-note{ font-size:12.5px; color:var(--text-soft); font-style:italic; margin-top:6px; }
+  .order-total{ font-family:'Mitr'; font-weight:700; color:var(--gold); font-size:16px; text-align:right; margin-top:8px; }
+  .order-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .order-actions button{
+    flex:1; border:none; border-radius:9px; padding:9px 10px; font-size:12.5px; font-family:'Sarabun'; cursor:pointer;
+  }
+  .btn-new{ background:var(--chili); color:#fff; }
+  .btn-preparing{ background:var(--gold); color:#241a0c; }
+  .btn-done{ background:var(--herb); color:#fff; }
+  .btn-quiet{ background:transparent; border:1px solid var(--line) !important; color:var(--text-soft); }
+
+  .no-orders{ text-align:center; color:var(--text-soft); padding:60px 20px; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ================= CUSTOMER VIEW ================= -->
+<div id="customerView">
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow">ร้านริมทาง · สั่งผ่านมือถือ</div>
+      <h1 class="shop">กวยจั๊บป้านิด</h1>
+      <div class="shop-sub">น้ำซุปพริกไทยเข้มข้น หมูสามชั้นนุ่ม เส้นม้วนทุกวัน</div>
+    </header>
+
+    <div class="hero">
+      <svg class="bowl-hero" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="128" rx="72" ry="14" fill="#000" opacity="0.25"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="#e9e2d3"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="none" stroke="#c9932e" stroke-width="2" opacity="0.4"/>
+        <ellipse cx="100" cy="78" rx="72" ry="16" fill="#4a2416"/>
+        <ellipse cx="100" cy="76" rx="72" ry="16" fill="#7a3a20"/>
+        <ellipse cx="70" cy="72" rx="5" ry="3" fill="#c9932e" opacity="0.7"/>
+        <ellipse cx="118" cy="80" rx="6" ry="3.5" fill="#c9932e" opacity="0.6"/>
+        <ellipse cx="95" cy="68" rx="4" ry="2.5" fill="#f4ead9" opacity="0.5"/>
+        <g stroke="#f4ead9" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.85">
+          <path class="steam s1" d="M75 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s2" d="M100 58 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s3" d="M125 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+        </g>
+      </svg>
+    </div>
+
+    <section class="menu">
+      <div class="menu-title">เลือกขนาด</div>
+      <div id="sizeList"></div>
+    </section>
+
+    <div class="fields">
+      <div class="field">
+        <label>ชื่อ / โต๊ะที่นั่ง</label>
+        <input id="custName" type="text" placeholder="เช่น โต๊ะ 4 หรือ คุณเอ">
+      </div>
+      <div class="field">
+        <label>หมายเหตุ (ถ้ามี)</label>
+        <textarea id="custNote" placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย"></textarea>
+      </div>
+    </div>
+    <div class="empty-note" id="emptyNote">เลือกอย่างน้อย 1 ขนาดเพื่อสั่งอาหาร</div>
+  </div>
+
+  <div class="cartbar">
+    <div class="cartbar-inner">
+      <div class="cart-total">
+        <div class="label">ยอดรวม</div>
+        <div class="amt" id="cartTotal">0 ฿</div>
+      </div>
+      <button class="order-btn" id="orderBtn" disabled>สั่งอาหาร</button>
+    </div>
+  </div>
+
+  <div class="modal-veil" id="modalVeil">
+    <div class="modal">
+      <div style="font-size:13px;color:#8a7a68;">รับออเดอร์แล้ว</div>
+      <div class="num" id="modalOrderNum">#0000</div>
+      <div style="font-size:14px;">กรุณารอเรียกที่โต๊ะ / จุดรับอาหาร</div>
+      <button class="close-btn" onclick="closeModal()">สั่งเพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADMIN VIEW ================= -->
+<div id="adminView" style="display:none;">
+  <div id="pinScreen" class="pin-screen">
+    <div style="font-family:'Mitr';font-size:20px;color:#f4ead9;">รหัสผ่านร้าน</div>
+    <div style="color:#8a7a68;font-size:13px;margin-top:6px;">สำหรับเจ้าของร้านเท่านั้น</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+    <button onclick="checkPin()">เข้าสู่ระบบ</button>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+
+  <div id="dashboard" class="admin-wrap" style="display:none;">
+    <div class="admin-header">
+      <div>
+        <h1>ออเดอร์วันนี้</h1>
+        <div class="sub">อัปเดตอัตโนมัติทุก 6 วินาที</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" onclick="loadOrders()">รีเฟรช</button>
+        <button class="btn-ghost" onclick="window.location.hash=''; window.location.reload();">ไปหน้าลูกค้า</button>
+      </div>
+    </div>
+
+    <div class="qr-card">
+      <canvas id="qrCanvas" width="120" height="120"></canvas>
+      <div>
+        <div class="qr-title">QR สำหรับลูกค้า</div>
+        <div style="font-size:13px;color:#c9c0b3;">ให้ลูกค้าสแกน หรือส่งลิงก์นี้</div>
+        <div class="link-text" id="custLink"></div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="statNew">0</div><div class="l">ใหม่</div></div>
+      <div class="stat"><div class="n" id="statPreparing">0</div><div class="l">กำลังทำ</div></div>
+      <div class="stat"><div class="n" id="statDone">0</div><div class="l">เสร็จแล้ว</div></div>
+      <div class="stat"><div class="n" id="statRevenue">0 ฿</div><div class="l">ยอดขายวันนี้</div></div>
+    </div>
+
+    <div id="ordersList"></div>
+  </div>
+</div>
+
+<script>
+// ---------------- CONFIG ----------------
+const SIZES = [
+  { id:'s', name:'เล็ก',  desc:'อิ่มพอดี เหมาะทานเล่น',      price:40 },
+  { id:'m', name:'กลาง', desc:'ขนาดมาตรฐาน ที่นิยมสั่ง',      price:50 },
+  { id:'l', name:'ใหญ่', desc:'จุใจ เนื้อ+เส้นเต็มชาม',        price:60 },
+];
+const ADMIN_PIN = '1234'; // <-- เปลี่ยนรหัสผ่านร้านตรงนี้
+
+// ---------------- helpers ----------------
+function bowlIcon(scale){
+  const w = 40*scale, h = 28*scale;
+  return `<svg width="${w}" height="${h+8}" viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="20" rx="28" ry="8" fill="#7a3a20"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="#e9e2d3"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="none" stroke="#c9932e" stroke-width="1.5" opacity="0.4"/>
+  </svg>`;
+}
+
+// ---------------- CUSTOMER LOGIC ----------------
+const cart = {}; // {sizeId: qty}
+SIZES.forEach(s => cart[s.id] = 0);
+
+function renderSizes(){
+  const el = document.getElementById('sizeList');
+  const scales = {s:0.75, m:1, l:1.25};
+  el.innerHTML = SIZES.map(s => `
+    <div class="size-card">
+      <div class="bowl-icon">${bowlIcon(scales[s.id])}</div>
+      <div class="size-info">
+        <div class="size-name">${s.name}</div>
+        <div class="size-desc">${s.desc}</div>
+        <div class="size-price">${s.price} ฿</div>
+      </div>
+      <div class="stepper">
+        <button onclick="changeQty('${s.id}', -1)">−</button>
+        <div class="qty" id="qty-${s.id}">0</div>
+        <button class="plus" onclick="changeQty('${s.id}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQty(id, delta){
+  cart[id] = Math.max(0, (cart[id]||0) + delta);
+  document.getElementById('qty-'+id).textContent = cart[id];
+  updateCartBar();
+}
+
+function updateCartBar(){
+  let total = 0, count = 0;
+  SIZES.forEach(s => { total += cart[s.id]*s.price; count += cart[s.id]; });
+  document.getElementById('cartTotal').textContent = total + ' ฿';
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = count === 0;
+  document.getElementById('emptyNote').style.display = count === 0 ? 'block' : 'none';
+}
+
+async function placeOrder(){
+  const items = SIZES.filter(s => cart[s.id] > 0).map(s => ({
+    size: s.name, sizeId: s.id, qty: cart[s.id], price: s.price, lineTotal: cart[s.id]*s.price
+  }));
+  if(items.length === 0) return;
+
+  const total = items.reduce((a,b)=>a+b.lineTotal,0);
+  const orderId = Date.now().toString(36).slice(-5).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase();
+  const order = {
+    id: orderId,
+    time: new Date().toISOString(),
+    table: document.getElementById('custName').value.trim(),
+    note: document.getElementById('custNote').value.trim(),
+    items, total,
+    status: 'new'
+  };
+
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่งออเดอร์...';
+
+  try{
+    const res = await window.storage.set('orders:'+orderId, JSON.stringify(order), true);
+    if(!res) throw new Error('save failed');
+    document.getElementById('modalOrderNum').textContent = '#'+orderId;
+    document.getElementById('modalVeil').classList.add('show');
+  }catch(e){
+    alert('ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+  }finally{
+    btn.textContent = 'สั่งอาหาร';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalVeil').classList.remove('show');
+  SIZES.forEach(s => { cart[s.id] = 0; document.getElementById('qty-'+s.id).textContent = 0; });
+  document.getElementById('custName').value = '';
+  document.getElementById('custNote').value = '';
+  updateCartBar();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSizes();
+  updateCartBar();
+  document.getElementById('orderBtn').addEventListener('click', placeOrder);
+});
+
+// ---------------- ADMIN LOGIC ----------------
+function checkPin(){
+  const val = document.getElementById('pinInput').value;
+  if(val === ADMIN_PIN){
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('kj_admin_ok','1');
+    initAdmin();
+  }else{
+    document.getElementById('pinError').textContent = 'รหัสผ่านไม่ถูกต้อง';
+  }
+}
+
+function initAdmin(){
+  const baseUrl = window.location.href.split('#')[0];
+  document.getElementById('custLink').textContent = baseUrl;
+  try{
+    new QRious({ element: document.getElementById('qrCanvas'), value: baseUrl, size: 108, background:'#fff', foreground:'#1c1410' });
+  }catch(e){}
+  loadOrders();
+  if(window._kjPoll) clearInterval(window._kjPoll);
+  window._kjPoll = setInterval(loadOrders, 6000);
+}
+
+async function loadOrders(){
+  const listEl = document.getElementById('ordersList');
+  try{
+    const listRes = await window.storage.list('orders:', true);
+    const keys = (listRes && listRes.keys) ? listRes.keys : [];
+    if(keys.length === 0){
+      listEl.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์เข้ามา</div>';
+      updateStats([]);
+      return;
+    }
+    const orders = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value) orders.push(JSON.parse(r.value));
+      }catch(e){ /* skip unreadable key */ }
+    }
+    orders.sort((a,b)=> new Date(b.time) - new Date(a.time));
+    renderOrders(orders);
+    updateStats(orders);
+  }catch(e){
+    listEl.innerHTML = '<div class="no-orders">โหลดออเดอร์ไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>';
+  }
+}
+
+function updateStats(orders){
+  const newC = orders.filter(o=>o.status==='new').length;
+  const prepC = orders.filter(o=>o.status==='preparing').length;
+  const doneC = orders.filter(o=>o.status==='done').length;
+  const revenue = orders.reduce((a,o)=>a+(o.total||0),0);
+  document.getElementById('statNew').textContent = newC;
+  document.getElementById('statPreparing').textContent = prepC;
+  document.getElementById('statDone').textContent = doneC;
+  document.getElementById('statRevenue').textContent = revenue + ' ฿';
+}
+
+function renderOrders(orders){
+  const listEl = document.getElementById('ordersList');
+  if(orders.length === 0){
+    listEl.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์เข้ามา</div>';
+    return;
+  }
+  listEl.innerHTML = orders.map(o => {
+    const time = new Date(o.time).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+    const itemsHtml = o.items.map(it => `<div><span>${it.size} × ${it.qty}</span><span>${it.lineTotal} ฿</span></div>`).join('');
+    return `
+      <div class="order-card status-${o.status}">
+        <div class="order-top">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-time">${time}</div>
+            ${o.table ? `<div class="order-table">${escapeHtml(o.table)}</div>` : ''}
+          </div>
+        </div>
+        <div class="order-items">${itemsHtml}</div>
+        ${o.note ? `<div class="order-note">หมายเหตุ: ${escapeHtml(o.note)}</div>` : ''}
+        <div class="order-total">รวม ${o.total} ฿</div>
+        <div class="order-actions">
+          <button class="btn-new" onclick="setStatus('${o.id}','new')">ใหม่</button>
+          <button class="btn-preparing" onclick="setStatus('${o.id}','preparing')">กำลังทำ</button>
+          <button class="btn-done" onclick="setStatus('${o.id}','done')">เสร็จแล้ว</button>
+          <button class="btn-quiet" onclick="deleteOrder('${o.id}')">ลบ</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function setStatus(id, status){
+  try{
+    const r = await window.storage.get('orders:'+id, true);
+    if(!r) return;
+    const order = JSON.parse(r.value);
+    order.status = status;
+    await window.storage.set('orders:'+id, JSON.stringify(order), true);
+    loadOrders();
+  }catch(e){ /* ignore */ }
+}
+
+async function deleteOrder(id){
+  if(!confirm('ลบออเดอร์นี้หรือไม่?')) return;
+  try{
+    await window.storage.delete('orders:'+id, true);
+    loadOrders();
+  }catch(e){ /* ignore */ }
+}
+
+// ---------------- ROUTER ----------------
+function route(){
+  const isAdmin = window.location.hash === '#admin';
+  document.body.classList.toggle('admin-mode', isAdmin);
+  document.getElementById('customerView').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('adminView').style.display = isAdmin ? 'block' : 'none';
+  if(isAdmin){
+    if(sessionStorage.getItem('kj_admin_ok') === '1'){
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      initAdmin();
+    }else{
+      document.getElementById('pinScreen').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  }else{
+    if(window._kjPoll) clearInterval(window._kjPoll);
+  }
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('DOMContentLoaded', route);
+</script>
+</body>
+</html>
