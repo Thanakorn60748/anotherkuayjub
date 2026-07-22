@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ร้านกวยจั๊บป้านิด | สั่งอาหาร</title>
+<title>ร้านกวยจั๊บZEEDZอุบล | สั่งอาหาร</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --broth:#1c1410;
@@ -32,7 +34,6 @@
   }
   ::selection{background:var(--chili); color:var(--cream-2);}
 
-  /* ---------- steam texture bg ---------- */
   .grain{
     position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
     background-image:radial-gradient(circle at 20% 30%, #fff 0.5px, transparent 0.5px),
@@ -60,7 +61,6 @@
     margin-top:8px; color:var(--text-soft); font-size:14.5px;
   }
 
-  /* ---------- hero bowl ---------- */
   .hero{
     display:flex; justify-content:center; padding:14px 0 6px;
   }
@@ -116,7 +116,6 @@
   .field input:focus, .field textarea:focus{ border-color:var(--gold); }
   .field textarea{ resize:vertical; min-height:56px; }
 
-  /* ---------- sticky cart bar ---------- */
   .cartbar{
     position:fixed; left:0; right:0; bottom:0; z-index:5;
     background:var(--broth-2); border-top:1px solid var(--line);
@@ -134,7 +133,6 @@
   .order-btn:active{ transform:scale(0.98); }
   .order-btn:disabled{ background:#4a3a30; color:var(--text-soft); cursor:not-allowed; }
 
-  /* ---------- confirm modal ---------- */
   .modal-veil{
     position:fixed; inset:0; background:rgba(10,7,5,0.72); z-index:10;
     display:none; align-items:center; justify-content:center; padding:24px;
@@ -154,7 +152,6 @@
 
   .empty-note{ text-align:center; color:var(--text-soft); font-size:13px; padding:6px 20px 0;}
 
-  /* =================== ADMIN =================== */
   body.admin-mode{ background:#100c09; }
   .admin-wrap{ max-width:720px; margin:0 auto; padding:26px 18px 60px; position:relative; z-index:1; }
   .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:10px; flex-wrap:wrap;}
@@ -340,6 +337,19 @@ const SIZES = [
 ];
 const ADMIN_PIN = '1234'; // <-- เปลี่ยนรหัสผ่านร้านตรงนี้
 
+// ----- Firebase config -----
+const firebaseConfig = {
+  apiKey: "AIzaSyCW4O2O5_X7C7XdiPlaiKfdxM1v-lo-7b8",
+  authDomain: "kuayjub-f46c4.firebaseapp.com",
+  projectId: "kuayjub-f46c4",
+  storageBucket: "kuayjub-f46c4.firebasestorage.app",
+  messagingSenderId: "147950947076",
+  appId: "1:147950947076:web:70b37699579725fbbade51"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ordersRef = db.collection('orders');
+
 // ---------------- helpers ----------------
 function bowlIcon(scale){
   const w = 40*scale, h = 28*scale;
@@ -351,7 +361,7 @@ function bowlIcon(scale){
 }
 
 // ---------------- CUSTOMER LOGIC ----------------
-const cart = {}; // {sizeId: qty}
+const cart = {};
 SIZES.forEach(s => cart[s.id] = 0);
 
 function renderSizes(){
@@ -411,11 +421,11 @@ async function placeOrder(){
   btn.textContent = 'กำลังส่งออเดอร์...';
 
   try{
-    const res = await window.storage.set('orders:'+orderId, JSON.stringify(order), true);
-    if(!res) throw new Error('save failed');
+    await ordersRef.doc(orderId).set(order);
     document.getElementById('modalOrderNum').textContent = '#'+orderId;
     document.getElementById('modalVeil').classList.add('show');
   }catch(e){
+    console.error(e);
     alert('ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
   }finally{
     btn.textContent = 'สั่งอาหาร';
@@ -455,35 +465,25 @@ function initAdmin(){
   try{
     new QRious({ element: document.getElementById('qrCanvas'), value: baseUrl, size: 108, background:'#fff', foreground:'#1c1410' });
   }catch(e){}
-  loadOrders();
-  if(window._kjPoll) clearInterval(window._kjPoll);
-  window._kjPoll = setInterval(loadOrders, 6000);
+
+  const listEl = document.getElementById('ordersList');
+  listEl.innerHTML = '<div class="no-orders">กำลังโหลด...</div>';
+
+  if(window._kjUnsub) window._kjUnsub();
+  window._kjUnsub = ordersRef.orderBy('time','desc').onSnapshot(
+    snapshot => {
+      const orders = snapshot.docs.map(d => d.data());
+      renderOrders(orders);
+      updateStats(orders);
+    },
+    err => {
+      console.error(err);
+      listEl.innerHTML = '<div class="no-orders">โหลดออเดอร์ไม่สำเร็จ ตรวจสอบการตั้งค่า Firebase</div>';
+    }
+  );
 }
 
-async function loadOrders(){
-  const listEl = document.getElementById('ordersList');
-  try{
-    const listRes = await window.storage.list('orders:', true);
-    const keys = (listRes && listRes.keys) ? listRes.keys : [];
-    if(keys.length === 0){
-      listEl.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์เข้ามา</div>';
-      updateStats([]);
-      return;
-    }
-    const orders = [];
-    for(const k of keys){
-      try{
-        const r = await window.storage.get(k, true);
-        if(r && r.value) orders.push(JSON.parse(r.value));
-      }catch(e){ /* skip unreadable key */ }
-    }
-    orders.sort((a,b)=> new Date(b.time) - new Date(a.time));
-    renderOrders(orders);
-    updateStats(orders);
-  }catch(e){
-    listEl.innerHTML = '<div class="no-orders">โหลดออเดอร์ไม่สำเร็จ ลองรีเฟรชอีกครั้ง</div>';
-  }
-}
+function loadOrders(){ initAdmin(); }
 
 function updateStats(orders){
   const newC = orders.filter(o=>o.status==='new').length;
@@ -535,21 +535,15 @@ function escapeHtml(str){
 
 async function setStatus(id, status){
   try{
-    const r = await window.storage.get('orders:'+id, true);
-    if(!r) return;
-    const order = JSON.parse(r.value);
-    order.status = status;
-    await window.storage.set('orders:'+id, JSON.stringify(order), true);
-    loadOrders();
-  }catch(e){ /* ignore */ }
+    await ordersRef.doc(id).update({ status });
+  }catch(e){ console.error(e); }
 }
 
 async function deleteOrder(id){
   if(!confirm('ลบออเดอร์นี้หรือไม่?')) return;
   try{
-    await window.storage.delete('orders:'+id, true);
-    loadOrders();
-  }catch(e){ /* ignore */ }
+    await ordersRef.doc(id).delete();
+  }catch(e){ console.error(e); }
 }
 
 // ---------------- ROUTER ----------------
@@ -568,7 +562,7 @@ function route(){
       document.getElementById('dashboard').style.display = 'none';
     }
   }else{
-    if(window._kjPoll) clearInterval(window._kjPoll);
+    if(window._kjUnsub) window._kjUnsub();
   }
 }
 window.addEventListener('hashchange', route);
