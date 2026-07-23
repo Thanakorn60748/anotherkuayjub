@@ -1,470 +1,572 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>กวยจั๊บ · อูบล</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background: #f5efe8; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
-    
-    /* === Customer View === */
-    .card { max-width: 500px; width: 100%; background: #fefcf9; border-radius: 48px; box-shadow: 0 24px 48px rgba(60,40,28,0.10); padding: 28px 22px 32px; border: 1px solid #eaded2; }
-    .brand { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .brand h1 { font-size: 2.2rem; font-weight: 600; color: #2d1f14; display: flex; align-items: baseline; gap: 6px; }
-    .brand h1 small { font-size: 0.9rem; font-weight: 400; background: #e8d7ca; padding: 0 14px; border-radius: 40px; color: #4f3727; }
-    .brand i { font-size: 2.2rem; color: #b08364; }
-    .subhead { color: #6f5644; font-size: 0.95rem; border-left: 4px solid #cfb29b; padding-left: 14px; margin: 6px 0 20px 0; background: #f8f1ea; border-radius: 0 40px 40px 0; padding: 8px 14px; display: inline-block; }
-    .size-selector { display: flex; gap: 12px; margin: 18px 0 22px; flex-wrap: wrap; }
-    .size-btn { flex: 1; min-width: 76px; background: #f3ebe4; border: 2px solid transparent; border-radius: 60px; padding: 12px 6px; text-align: center; font-weight: 600; font-size: 1.0rem; color: #3d2c1e; cursor: pointer; transition: 0.15s; }
-    .size-btn i { display: block; font-size: 1.4rem; margin-bottom: 4px; color: #b3927c; }
-    .size-btn span { display: block; font-weight: 400; font-size: 0.7rem; color: #7a6454; margin-top: 2px; }
-    .size-btn.active { background: #ffffff; border-color: #b87c5a; box-shadow: 0 6px 14px rgba(184,124,90,0.18); }
-    .size-btn.active i { color: #b87c5a; }
-    
-    /* === Noodle Section - Only 2 options === */
-    .noodle-section { margin: 18px 0 20px; }
-    .noodle-section label { font-weight: 500; color: #3d2c1e; display: block; margin-bottom: 8px; font-size: 0.95rem; }
-    .noodle-grid { display: flex; flex-wrap: wrap; gap: 12px; }
-    .noodle-opt { 
-      flex: 1; 
-      min-width: 120px;
-      background: #f3ebe4; 
-      border-radius: 60px; 
-      padding: 14px 20px; 
-      font-size: 1rem; 
-      font-weight: 600; 
-      color: #2d1f14; 
-      cursor: pointer; 
-      border: 2px solid transparent; 
-      transition: 0.15s; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      gap: 10px; 
-      text-align: center;
-    }
-    .noodle-opt i { color: #a4836a; font-size: 1.2rem; }
-    .noodle-opt.active { 
-      background: #ffffff; 
-      border-color: #b87c5a; 
-      box-shadow: 0 4px 12px rgba(184,124,90,0.15); 
-    }
-    .noodle-opt.active i { color: #b87c5a; }
-    
-    .qty-row { display: flex; align-items: center; gap: 12px; background: #f3ebe4; padding: 6px 12px 6px 20px; border-radius: 60px; margin: 18px 0 24px; }
-    .qty-row label { font-weight: 500; color: #3d2c1e; flex: 1; }
-    .qty-control { display: flex; align-items: center; gap: 12px; }
-    .qty-control button { width: 36px; height: 36px; border-radius: 40px; border: none; background: white; font-size: 1.4rem; font-weight: 300; color: #3d2c1e; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: 0.1s; display: flex; align-items: center; justify-content: center; }
-    .qty-control button:active { background: #dfd0c4; }
-    .qty-control span { font-size: 1.5rem; font-weight: 600; min-width: 32px; text-align: center; color: #2d1f14; }
-    .order-btn { width: 100%; background: #b87c5a; border: none; border-radius: 60px; padding: 18px 12px; font-size: 1.25rem; font-weight: 600; color: white; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.15s; box-shadow: 0 10px 20px rgba(184,124,90,0.28); margin-top: 6px; }
-    .order-btn:active { transform: scale(0.97); background: #9e6b4d; }
-    
-    /* === BIG TOAST MESSAGE === */
-    .toast-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      animation: fadeIn 0.3s ease;
-    }
-    .toast-overlay.show { display: flex; }
-    
-    .toast-box {
-      background: #fefcf9;
-      border-radius: 60px;
-      padding: 50px 60px;
-      max-width: 90%;
-      text-align: center;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.3);
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 3px solid #b87c5a;
-    }
-    .toast-box i { 
-      font-size: 4.5rem; 
-      color: #2b7a5a; 
-      display: block; 
-      margin-bottom: 16px; 
-    }
-    .toast-box .big-text { 
-      font-size: 2.5rem; 
-      font-weight: 700; 
-      color: #2d1f14; 
-      margin-bottom: 8px; 
-    }
-    .toast-box .sub-text { 
-      font-size: 1.3rem; 
-      color: #6f5644; 
-      font-weight: 500; 
-    }
-    .toast-box .order-detail {
-      font-size: 1.1rem;
-      color: #7a6454;
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #f5ede7;
-      border-radius: 40px;
-      display: inline-block;
-    }
-    .toast-close-btn {
-      margin-top: 24px;
-      background: #b87c5a;
-      border: none;
-      border-radius: 60px;
-      padding: 14px 40px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: white;
-      cursor: pointer;
-      transition: 0.15s;
-    }
-    .toast-close-btn:active { transform: scale(0.95); background: #9e6b4d; }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes popIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    .footer-note { margin-top: 16px; font-size: 0.65rem; color: #b8a494; text-align: center; }
-    
-    /* === Admin View === */
-    .admin-panel { display: none; max-width: 700px; width: 100%; background: #fcf8f4; border-radius: 40px; padding: 30px 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.15); border: 1px solid #4a3728; }
-    .admin-panel.active { display: block; }
-    .customer-view { display: block; }
-    .customer-view.hidden { display: none; }
-    
-    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 3px solid #b87c5a; padding-bottom: 16px; }
-    .admin-header h1 { font-size: 1.8rem; color: #2d1f14; display: flex; align-items: center; gap: 12px; }
-    .admin-header h1 i { color: #b87c5a; }
-    .admin-header .badge-count { background: #b87c5a; color: white; border-radius: 40px; padding: 4px 16px; font-size: 0.9rem; font-weight: 600; }
-    .stats { display: flex; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
-    .stat-box { background: white; border-radius: 20px; padding: 12px 20px; flex: 1; min-width: 100px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e8ddd2; }
-    .stat-box .label { font-size: 0.7rem; text-transform: uppercase; color: #8a7564; letter-spacing: 0.5px; }
-    .stat-box .value { font-size: 1.6rem; font-weight: 700; color: #2d1f14; }
-    .order-list { background: white; border-radius: 24px; padding: 8px 4px; max-height: 500px; overflow-y: auto; border: 1px solid #e8ddd2; }
-    .order-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f0e8e0; }
-    .order-item:last-child { border-bottom: none; }
-    .order-item .info { display: flex; flex-direction: column; gap: 2px; }
-    .order-item .info .main { font-weight: 600; color: #2d1f14; font-size: 1.05rem; }
-    .order-item .info .sub { font-size: 0.8rem; color: #7a6454; display: flex; gap: 10px; flex-wrap: wrap; }
-    .order-item .info .sub .tag { background: #f0e8e0; border-radius: 40px; padding: 0 12px; font-size: 0.7rem; font-weight: 500; }
-    .order-item .time { font-size: 0.75rem; color: #a69080; }
-    .empty-msg { text-align: center; padding: 40px 0; color: #a69080; font-style: italic; }
-    .actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
-    .btn { background: #f0e8e0; border: none; border-radius: 60px; padding: 10px 24px; font-weight: 500; color: #2d1f14; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.1s; font-size: 0.9rem; }
-    .btn:active { transform: scale(0.96); }
-    .btn-danger { background: #d4b8a8; color: #3d241a; }
-    .btn-primary { background: #b87c5a; color: white; }
-    .refresh-note { margin-top: 16px; font-size: 0.7rem; color: #8a7564; text-align: center; }
-    .admin-back-btn { margin-top: 20px; text-align: center; }
-    .admin-back-btn .btn { background: #e8ddd2; }
-    .admin-hint { position: fixed; bottom: 10px; right: 10px; font-size: 0.5rem; color: rgba(0,0,0,0.08); pointer-events: none; user-select: none; }
-    
-    @media (max-width: 480px) { 
-      .card { padding: 20px 14px; } 
-      .size-btn { min-width: 68px; font-size: 0.9rem; }
-      .admin-panel { padding: 20px 16px; }
-      .admin-header h1 { font-size: 1.4rem; }
-      .toast-box { padding: 30px 24px; }
-      .toast-box .big-text { font-size: 1.8rem; }
-      .toast-box .sub-text { font-size: 1rem; }
-      .toast-box i { font-size: 3.5rem; }
-      .noodle-opt { min-width: 100px; padding: 12px 16px; font-size: 0.9rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านกวยจั๊บZEEDZอุบล | สั่งอาหาร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --broth:#1c1410;
+    --broth-2:#2b1f18;
+    --cream:#f4ead9;
+    --cream-2:#fffaf1;
+    --chili:#c0421f;
+    --chili-dark:#8f2e14;
+    --gold:#c9932e;
+    --herb:#5b7052;
+    --text-soft:#8a7a68;
+    --line: rgba(244,234,217,0.14);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--broth);
+    color:var(--cream);
+    font-family:'Sarabun', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--chili); color:var(--cream-2);}
+
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image:radial-gradient(circle at 20% 30%, #fff 0.5px, transparent 0.5px),
+                      radial-gradient(circle at 70% 60%, #fff 0.5px, transparent 0.5px);
+    background-size: 3px 3px, 5px 5px;
+  }
+
+  .wrap{ max-width:560px; margin:0 auto; position:relative; z-index:1; padding-bottom:120px;}
+
+  header.top{
+    padding:38px 24px 24px;
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:10px;
+  }
+  h1.shop{
+    font-family:'Mitr', sans-serif; font-weight:700;
+    font-size:38px; margin:0; line-height:1.15;
+    color:var(--cream-2);
+  }
+  .shop-sub{
+    margin-top:8px; color:var(--text-soft); font-size:14.5px;
+  }
+
+  .hero{
+    display:flex; justify-content:center; padding:14px 0 6px;
+  }
+  .bowl-hero{ width:180px; height:auto; }
+  @keyframes rise{
+    0%{ transform:translateY(0) scaleX(1); opacity:0.55; }
+    50%{ transform:translateY(-14px) scaleX(1.15); opacity:0.15;}
+    100%{ transform:translateY(-30px) scaleX(0.9); opacity:0;}
+  }
+  .steam{ transform-origin:bottom center; animation: rise 3.2s ease-in-out infinite; }
+  .steam.s2{ animation-delay:0.9s; }
+  .steam.s3{ animation-delay:1.7s; }
+
+  section.menu{ padding:18px 20px 0; }
+  .menu-title{
+    font-family:'Mitr', sans-serif; font-size:15px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--gold); margin:0 0 14px 4px;
+  }
+
+  .size-card{
+    display:flex; align-items:center; gap:14px;
+    background: linear-gradient(180deg, var(--broth-2), var(--broth-2));
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding:14px 16px; margin-bottom:12px;
+  }
+  .bowl-icon{ flex:0 0 auto; }
+  .size-info{ flex:1; min-width:0; }
+  .size-name{ font-family:'Mitr'; font-weight:600; font-size:18px; color:var(--cream-2); }
+  .size-desc{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+  .size-price{ font-size:14px; color:var(--gold); margin-top:6px; font-weight:600; }
+
+  .stepper{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .stepper button{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--cream);
+    font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.15s, transform 0.1s;
+  }
+  .stepper button:active{ transform:scale(0.9); }
+  .stepper button.plus{ background:var(--chili); border-color:var(--chili); color:var(--cream-2); }
+  .stepper .qty{ width:20px; text-align:center; font-weight:600; font-family:'Mitr'; }
+
+  .fields{ padding:22px 20px 0; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; color:var(--text-soft); margin-bottom:6px; letter-spacing:0.03em; }
+  .field input, .field textarea{
+    width:100%; background:var(--broth-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; color:var(--cream-2); font-family:'Sarabun';
+    font-size:15px; outline:none;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--gold); }
+  .field textarea{ resize:vertical; min-height:56px; }
+
+  .cartbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:5;
+    background:var(--broth-2); border-top:1px solid var(--line);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+  }
+  .cartbar-inner{ max-width:560px; margin:0 auto; display:flex; align-items:center; gap:14px; }
+  .cart-total{ flex:0 0 auto; }
+  .cart-total .label{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.1em; }
+  .cart-total .amt{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--gold); }
+  .order-btn{
+    flex:1; background:var(--chili); color:var(--cream-2); border:none; border-radius:14px;
+    padding:15px 18px; font-family:'Mitr'; font-weight:600; font-size:16px; cursor:pointer;
+    transition:transform 0.1s, background 0.15s;
+  }
+  .order-btn:active{ transform:scale(0.98); }
+  .order-btn:disabled{ background:#4a3a30; color:var(--text-soft); cursor:not-allowed; }
+
+  .modal-veil{
+    position:fixed; inset:0; background:rgba(10,7,5,0.72); z-index:10;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-veil.show{ display:flex; }
+  .modal{
+    background:var(--cream-2); color:var(--broth); border-radius:20px; padding:30px 26px;
+    max-width:360px; width:100%; text-align:center;
+  }
+  .modal .num{
+    font-family:'Mitr'; font-weight:700; font-size:34px; color:var(--chili); margin:10px 0 4px;
+  }
+  .modal .close-btn{
+    margin-top:20px; background:var(--broth); color:var(--cream-2); border:none;
+    border-radius:12px; padding:12px 20px; font-family:'Mitr'; font-weight:600; cursor:pointer; width:100%;
+  }
+
+  .empty-note{ text-align:center; color:var(--text-soft); font-size:13px; padding:6px 20px 0;}
+
+  body.admin-mode{ background:#100c09; }
+  .admin-wrap{ max-width:720px; margin:0 auto; padding:26px 18px 60px; position:relative; z-index:1; }
+  .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:10px; flex-wrap:wrap;}
+  .admin-header h1{ font-family:'Mitr'; font-size:22px; margin:0; color:var(--cream-2);}
+  .admin-header .sub{ color:var(--text-soft); font-size:12.5px; }
+  .btn-ghost{
+    background:transparent; border:1px solid var(--line); color:var(--cream);
+    border-radius:10px; padding:9px 14px; font-family:'Sarabun'; font-size:13px; cursor:pointer;
+  }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+
+  .pin-screen{ max-width:320px; margin:80px auto; text-align:center; }
+  .pin-screen input{
+    width:100%; text-align:center; letter-spacing:0.5em; font-size:22px;
+    background:var(--broth-2); border:1px solid var(--line); border-radius:12px;
+    padding:14px; color:var(--cream-2); margin-top:16px; font-family:'Mitr';
+  }
+  .pin-screen button{
+    margin-top:14px; width:100%; background:var(--chili); color:var(--cream-2); border:none;
+    border-radius:12px; padding:13px; font-family:'Mitr'; font-weight:600; cursor:pointer;
+  }
+  .pin-error{ color:var(--chili); font-size:12.5px; margin-top:10px; min-height:16px; }
+
+  .qr-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:16px;
+    padding:18px; display:flex; gap:16px; align-items:center; margin-bottom:22px; flex-wrap:wrap;
+  }
+  .qr-card canvas{ border-radius:10px; background:#fff; padding:6px; }
+  .qr-card .link-text{ font-size:12px; color:var(--text-soft); word-break:break-all; margin-top:6px; }
+  .qr-card .qr-title{ font-family:'Mitr'; font-size:14px; color:var(--gold); margin-bottom:4px;}
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat{
+    flex:1; min-width:100px; background:var(--broth-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px;
+  }
+  .stat .n{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--cream-2); }
+  .stat .l{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.08em; }
+
+  .order-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:12px; position:relative;
+  }
+  .order-card.status-new{ border-left:4px solid var(--chili); }
+  .order-card.status-preparing{ border-left:4px solid var(--gold); }
+  .order-card.status-done{ border-left:4px solid var(--herb); opacity:0.6; }
+  .order-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .order-id{ font-family:'Mitr'; font-weight:600; font-size:15px; color:var(--cream-2); }
+  .order-time{ font-size:11.5px; color:var(--text-soft); margin-top:2px;}
+  .order-table{ font-size:13px; color:var(--gold); margin-top:4px; }
+  .order-items{ margin:10px 0; font-size:14px; }
+  .order-items div{ display:flex; justify-content:space-between; padding:3px 0; color:var(--cream); }
+  .order-note{ font-size:12.5px; color:var(--text-soft); font-style:italic; margin-top:6px; }
+  .order-total{ font-family:'Mitr'; font-weight:700; color:var(--gold); font-size:16px; text-align:right; margin-top:8px; }
+  .order-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .order-actions button{
+    flex:1; border:none; border-radius:9px; padding:9px 10px; font-size:12.5px; font-family:'Sarabun'; cursor:pointer;
+  }
+  .btn-new{ background:var(--chili); color:#fff; }
+  .btn-preparing{ background:var(--gold); color:#241a0c; }
+  .btn-done{ background:var(--herb); color:#fff; }
+  .btn-quiet{ background:transparent; border:1px solid var(--line) !important; color:var(--text-soft); }
+
+  .no-orders{ text-align:center; color:var(--text-soft); padding:60px 20px; font-size:14px; }
+</style>
 </head>
 <body>
+<div class="grain"></div>
 
-<!-- ===== CUSTOMER VIEW ===== -->
-<div id="customerView" class="customer-view">
-  <div class="card">
-    <div class="brand">
-      <h1>กวยจั๊บ <small>อูบล</small></h1>
-      <i class="fas fa-utensils"></i>
+<!-- ================= CUSTOMER VIEW ================= -->
+<div id="customerView">
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow">ร้านริมทาง · สั่งผ่านมือถือ</div>
+      <h1 class="shop">กวยจั๊บZEEDZอุบล</h1>
+      <div class="shop-sub">น้ำซุปพริกไทยเข้มข้น หมูสามชั้นนุ่ม เส้นม้วนทุกวัน</div>
+    </header>
+
+    <div class="hero">
+      <svg class="bowl-hero" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="128" rx="72" ry="14" fill="#000" opacity="0.25"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="#e9e2d3"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="none" stroke="#c9932e" stroke-width="2" opacity="0.4"/>
+        <ellipse cx="100" cy="78" rx="72" ry="16" fill="#4a2416"/>
+        <ellipse cx="100" cy="76" rx="72" ry="16" fill="#7a3a20"/>
+        <ellipse cx="70" cy="72" rx="5" ry="3" fill="#c9932e" opacity="0.7"/>
+        <ellipse cx="118" cy="80" rx="6" ry="3.5" fill="#c9932e" opacity="0.6"/>
+        <ellipse cx="95" cy="68" rx="4" ry="2.5" fill="#f4ead9" opacity="0.5"/>
+        <g stroke="#f4ead9" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.85">
+          <path class="steam s1" d="M75 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s2" d="M100 58 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s3" d="M125 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+        </g>
+      </svg>
     </div>
-    <div class="subhead"><i class="fas fa-store" style="margin-right: 8px; color:#b3927c;"></i> เส้นสด · 3 ขนาด · สั่งเลย</div>
 
-    <div class="size-selector" id="sizeSelector">
-      <div class="size-btn" data-size="เล็ก" data-price="45"><i class="fas fa-coffee"></i> เล็ก <span>45 ฿</span></div>
-      <div class="size-btn active" data-size="กลาง" data-price="55"><i class="fas fa-mug-hot"></i> กลาง <span>55 ฿</span></div>
-      <div class="size-btn" data-size="ใหญ่" data-price="65"><i class="fas fa-wine-bottle"></i> ใหญ่ <span>65 ฿</span></div>
+    <section class="menu">
+      <div class="menu-title">เลือกขนาด</div>
+      <div id="sizeList"></div>
+    </section>
+
+    <div class="fields">
+      <div class="field">
+        <label>ชื่อ</label>
+        <input id="custName" type="text" placeholder="เช่น คุณเอ หรือ CK">
+      </div>
+      <div class="field">
+        <label>หมายเหตุ (ถ้ามี)</label>
+        <textarea id="custNote" placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย"></textarea>
+      </div>
     </div>
+    <div class="empty-note" id="emptyNote">เลือกอย่างน้อย 1 ขนาดเพื่อสั่งอาหาร</div>
+  </div>
 
-    <!-- === Only 2 Noodle Options === -->
-    <div class="noodle-section">
-      <label><i class="fas fa-seedling" style="margin-right: 8px; color:#a4836a;"></i>เลือกเส้น</label>
-      <div class="noodle-grid" id="noodleGrid">
-        <div class="noodle-opt active" data-noodle="เส้นปกติ"><i class="fas fa-utensils"></i> เส้นปกติ</div>
-        <div class="noodle-opt" data-noodle="เส้นบุก"><i class="fas fa-leaf"></i> เส้นบุก</div>
+  <div class="cartbar">
+    <div class="cartbar-inner">
+      <div class="cart-total">
+        <div class="label">ยอดรวม</div>
+        <div class="amt" id="cartTotal">0 ฿</div>
+      </div>
+      <button class="order-btn" id="orderBtn" disabled>สั่งอาหาร</button>
+    </div>
+  </div>
+
+  <div class="modal-veil" id="modalVeil">
+    <div class="modal">
+      <div style="font-size:13px;color:#8a7a68;">รับออเดอร์แล้ว</div>
+      <div class="num" id="modalOrderNum">#0000</div>
+      <div style="font-size:14px;">กรุณารอเรียกที่โต๊ะ / จุดรับอาหาร</div>
+      <button class="close-btn" onclick="closeModal()">สั่งเพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADMIN VIEW ================= -->
+<div id="adminView" style="display:none;">
+  <div id="pinScreen" class="pin-screen">
+    <div style="font-family:'Mitr';font-size:20px;color:#f4ead9;">รหัสผ่านร้าน</div>
+    <div style="color:#8a7a68;font-size:13px;margin-top:6px;">สำหรับเจ้าของร้านเท่านั้น</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+    <button onclick="checkPin()">เข้าสู่ระบบ</button>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+
+  <div id="dashboard" class="admin-wrap" style="display:none;">
+    <div class="admin-header">
+      <div>
+        <h1>ออเดอร์วันนี้</h1>
+        <div class="sub">อัปเดตอัตโนมัติทุก 6 วินาที</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" onclick="loadOrders()">รีเฟรช</button>
+        <button class="btn-ghost" onclick="window.location.hash=''; window.location.reload();">ไปหน้าลูกค้า</button>
       </div>
     </div>
 
-    <div class="qty-row">
-      <label><i class="fas fa-hashtag" style="margin-right: 8px; color:#b3927c;"></i>จำนวน</label>
-      <div class="qty-control">
-        <button id="qtyDec">−</button>
-        <span id="qtyDisplay">1</span>
-        <button id="qtyInc">+</button>
+    <div class="qr-card">
+      <canvas id="qrCanvas" width="120" height="120"></canvas>
+      <div>
+        <div class="qr-title">QR สำหรับลูกค้า</div>
+        <div style="font-size:13px;color:#c9c0b3;">ให้ลูกค้าสแกน หรือส่งลิงก์นี้</div>
+        <div class="link-text" id="custLink"></div>
       </div>
     </div>
 
-    <button class="order-btn" id="orderBtn"><i class="fas fa-bowl-food"></i> สั่งเลย</button>
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="statNew">0</div><div class="l">ใหม่</div></div>
+      <div class="stat"><div class="n" id="statPreparing">0</div><div class="l">กำลังทำ</div></div>
+      <div class="stat"><div class="n" id="statDone">0</div><div class="l">เสร็จแล้ว</div></div>
+      <div class="stat"><div class="n" id="statRevenue">0 ฿</div><div class="l">ยอดขายวันนี้</div></div>
+    </div>
 
-    <div class="footer-note"><i class="fas fa-qrcode"></i> สแกนสั่ง · ออเดอร์เก็บในเครื่องคุณ</div>
+    <div id="ordersList"></div>
   </div>
 </div>
-
-<!-- ===== BIG TOAST OVERLAY ===== -->
-<div id="toastOverlay" class="toast-overlay">
-  <div class="toast-box">
-    <i class="fas fa-check-circle"></i>
-    <div class="big-text">✅ สั่งแล้ว!</div>
-    <div class="sub-text">ขอบคุณที่สั่งอาหารค่ะ</div>
-    <div class="order-detail" id="orderDetail">กลาง · เส้นปกติ x1</div>
-    <button class="toast-close-btn" id="toastCloseBtn">ตกลง</button>
-  </div>
-</div>
-
-<!-- ===== ADMIN VIEW ===== -->
-<div id="adminPanel" class="admin-panel">
-  <div class="admin-header">
-    <h1><i class="fas fa-user-shield"></i> ออเดอร์ <span style="font-size:0.8rem; color:#7a6454; font-weight:400;">(เฉพาะคุณ)</span></h1>
-    <span class="badge-count" id="orderCount">0</span>
-  </div>
-
-  <div class="stats">
-    <div class="stat-box"><div class="label">ออเดอร์ทั้งหมด</div><div class="value" id="totalOrders">0</div></div>
-    <div class="stat-box"><div class="label">ลูกค้าสั่ง</div><div class="value" id="totalItems">0</div></div>
-  </div>
-
-  <div class="order-list" id="orderList">
-    <div class="empty-msg"><i class="fas fa-inbox"></i> ยังไม่มีออเดอร์</div>
-  </div>
-
-  <div class="actions">
-    <button class="btn btn-primary" id="refreshBtn"><i class="fas fa-rotate"></i> รีเฟรช</button>
-    <button class="btn btn-danger" id="clearBtn"><i class="fas fa-trash-can"></i> ล้างทั้งหมด</button>
-  </div>
-  <div class="refresh-note"><i class="fas fa-sync-alt fa-fw"></i> ออเดอร์อัปเดตอัตโนมัติทุก 5 วินาที</div>
-  
-  <div class="admin-back-btn">
-    <button class="btn" id="backToCustomer"><i class="fas fa-arrow-left"></i> กลับไปหน้าร้าน</button>
-  </div>
-</div>
-
-<!-- Secret hint -->
-<div class="admin-hint">🔑 #admin</div>
 
 <script>
-  (function() {
-    // === STATE ===
-    let selectedSize = 'กลาง', selectedPrice = 55, selectedNoodle = 'เส้นปกติ', quantity = 1;
-    let adminInterval = null;
+// ---------------- CONFIG ----------------
+const SIZES = [
+  { id:'s', name:'เล็ก',  desc:'อิ่มพอดี เหมาะทานเล่น',      price:40 },
+  { id:'m', name:'กลาง', desc:'ขนาดมาตรฐาน ที่นิยมสั่ง',      price:50 },
+  { id:'l', name:'ใหญ่', desc:'จุใจ เนื้อ+เส้นเต็มชาม',        price:60 },
+];
+const ADMIN_PIN = '2100'; // <-- เปลี่ยนรหัสผ่านร้านตรงนี้
 
-    // === DOM REFS ===
-    const customerView = document.getElementById('customerView');
-    const adminPanel = document.getElementById('adminPanel');
-    const sizeBtns = document.querySelectorAll('.size-btn');
-    const noodleOpts = document.querySelectorAll('.noodle-opt');
-    const qtyDisplay = document.getElementById('qtyDisplay');
-    const qtyDec = document.getElementById('qtyDec');
-    const qtyInc = document.getElementById('qtyInc');
-    const orderBtn = document.getElementById('orderBtn');
-    const toastOverlay = document.getElementById('toastOverlay');
-    const toastCloseBtn = document.getElementById('toastCloseBtn');
-    const orderDetail = document.getElementById('orderDetail');
-    const orderList = document.getElementById('orderList');
-    const totalOrdersEl = document.getElementById('totalOrders');
-    const totalItemsEl = document.getElementById('totalItems');
-    const orderCountBadge = document.getElementById('orderCount');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const backBtn = document.getElementById('backToCustomer');
+// ----- Firebase config -----
+const firebaseConfig = {
+  apiKey: "AIzaSyCW4O2O5_X7C7XdiPlaiKfdxM1v-lo-7b8",
+  authDomain: "kuayjub-f46c4.firebaseapp.com",
+  projectId: "kuayjub-f46c4",
+  storageBucket: "kuayjub-f46c4.firebasestorage.app",
+  messagingSenderId: "147950947076",
+  appId: "1:147950947076:web:70b37699579725fbbade51"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ordersRef = db.collection('orders');
 
-    // === CUSTOMER FUNCTIONS ===
-    function getOrders() {
-      try { return JSON.parse(localStorage.getItem('kuayjub_orders')) || []; } catch { return []; }
+// ---------------- helpers ----------------
+function bowlIcon(scale){
+  const w = 40*scale, h = 28*scale;
+  return `<svg width="${w}" height="${h+8}" viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="20" rx="28" ry="8" fill="#7a3a20"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="#e9e2d3"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="none" stroke="#c9932e" stroke-width="1.5" opacity="0.4"/>
+  </svg>`;
+}
+
+// ---------------- CUSTOMER LOGIC ----------------
+const cart = {};
+SIZES.forEach(s => cart[s.id] = 0);
+
+function renderSizes(){
+  const el = document.getElementById('sizeList');
+  const scales = {s:0.75, m:1, l:1.25};
+  el.innerHTML = SIZES.map(s => `
+    <div class="size-card">
+      <div class="bowl-icon">${bowlIcon(scales[s.id])}</div>
+      <div class="size-info">
+        <div class="size-name">${s.name}</div>
+        <div class="size-desc">${s.desc}</div>
+        <div class="size-price">${s.price} ฿</div>
+      </div>
+      <div class="stepper">
+        <button onclick="changeQty('${s.id}', -1)">−</button>
+        <div class="qty" id="qty-${s.id}">0</div>
+        <button class="plus" onclick="changeQty('${s.id}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQty(id, delta){
+  cart[id] = Math.max(0, (cart[id]||0) + delta);
+  document.getElementById('qty-'+id).textContent = cart[id];
+  updateCartBar();
+}
+
+function updateCartBar(){
+  let total = 0, count = 0;
+  SIZES.forEach(s => { total += cart[s.id]*s.price; count += cart[s.id]; });
+  document.getElementById('cartTotal').textContent = total + ' ฿';
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = count === 0;
+  document.getElementById('emptyNote').style.display = count === 0 ? 'block' : 'none';
+}
+
+async function placeOrder(){
+  const items = SIZES.filter(s => cart[s.id] > 0).map(s => ({
+    size: s.name, sizeId: s.id, qty: cart[s.id], price: s.price, lineTotal: cart[s.id]*s.price
+  }));
+  if(items.length === 0) return;
+
+  const total = items.reduce((a,b)=>a+b.lineTotal,0);
+  const orderId = Date.now().toString(36).slice(-5).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase();
+  const order = {
+    id: orderId,
+    time: new Date().toISOString(),
+    table: document.getElementById('custName').value.trim(),
+    note: document.getElementById('custNote').value.trim(),
+    items, total,
+    status: 'new'
+  };
+
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่งออเดอร์...';
+
+  try{
+    await ordersRef.doc(orderId).set(order);
+    document.getElementById('modalOrderNum').textContent = '#'+orderId;
+    document.getElementById('modalVeil').classList.add('show');
+  }catch(e){
+    console.error(e);
+    alert('ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+  }finally{
+    btn.textContent = 'สั่งอาหาร';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalVeil').classList.remove('show');
+  SIZES.forEach(s => { cart[s.id] = 0; document.getElementById('qty-'+s.id).textContent = 0; });
+  document.getElementById('custName').value = '';
+  document.getElementById('custNote').value = '';
+  updateCartBar();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSizes();
+  updateCartBar();
+  document.getElementById('orderBtn').addEventListener('click', placeOrder);
+});
+
+// ---------------- ADMIN LOGIC ----------------
+function checkPin(){
+  const val = document.getElementById('pinInput').value;
+  if(val === ADMIN_PIN){
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('kj_admin_ok','1');
+    initAdmin();
+  }else{
+    document.getElementById('pinError').textContent = 'รหัสผ่านไม่ถูกต้อง';
+  }
+}
+
+function initAdmin(){
+  const baseUrl = window.location.href.split('#')[0];
+  document.getElementById('custLink').textContent = baseUrl;
+  try{
+    new QRious({ element: document.getElementById('qrCanvas'), value: baseUrl, size: 108, background:'#fff', foreground:'#1c1410' });
+  }catch(e){}
+
+  const listEl = document.getElementById('ordersList');
+  listEl.innerHTML = '<div class="no-orders">กำลังโหลด...</div>';
+
+  if(window._kjUnsub) window._kjUnsub();
+  window._kjUnsub = ordersRef.orderBy('time','desc').onSnapshot(
+    snapshot => {
+      const orders = snapshot.docs.map(d => d.data());
+      renderOrders(orders);
+      updateStats(orders);
+    },
+    err => {
+      console.error(err);
+      listEl.innerHTML = '<div class="no-orders">โหลดออเดอร์ไม่สำเร็จ ตรวจสอบการตั้งค่า Firebase</div>';
     }
-    function saveOrders(orders) { localStorage.setItem('kuayjub_orders', JSON.stringify(orders)); }
+  );
+}
 
-    sizeBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        sizeBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        selectedSize = this.dataset.size;
-        selectedPrice = parseInt(this.dataset.price, 10);
-      });
-    });
+function loadOrders(){ initAdmin(); }
 
-    noodleOpts.forEach(opt => {
-      opt.addEventListener('click', function() {
-        noodleOpts.forEach(o => o.classList.remove('active'));
-        this.classList.add('active');
-        selectedNoodle = this.dataset.noodle;
-      });
-    });
+function updateStats(orders){
+  const newC = orders.filter(o=>o.status==='new').length;
+  const prepC = orders.filter(o=>o.status==='preparing').length;
+  const doneC = orders.filter(o=>o.status==='done').length;
+  const revenue = orders.reduce((a,o)=>a+(o.total||0),0);
+  document.getElementById('statNew').textContent = newC;
+  document.getElementById('statPreparing').textContent = prepC;
+  document.getElementById('statDone').textContent = doneC;
+  document.getElementById('statRevenue').textContent = revenue + ' ฿';
+}
 
-    function updateQtyDisplay() { qtyDisplay.innerText = quantity; }
-    qtyDec.addEventListener('click', function() { if (quantity > 1) { quantity--; updateQtyDisplay(); } });
-    qtyInc.addEventListener('click', function() { if (quantity < 99) { quantity++; updateQtyDisplay(); } });
-
-    // === SHOW BIG TOAST ===
-    function showBigToast(size, noodle, qty) {
-      orderDetail.textContent = `${size} · ${noodle} x${qty}`;
-      toastOverlay.classList.add('show');
-      // Auto close after 4 seconds
-      setTimeout(() => {
-        toastOverlay.classList.remove('show');
-      }, 4000);
-    }
-
-    toastCloseBtn.addEventListener('click', function() {
-      toastOverlay.classList.remove('show');
-    });
-
-    // Close toast when clicking outside the box
-    toastOverlay.addEventListener('click', function(e) {
-      if (e.target === toastOverlay) {
-        toastOverlay.classList.remove('show');
-      }
-    });
-
-    orderBtn.addEventListener('click', function() {
-      const order = {
-        size: selectedSize,
-        price: selectedPrice,
-        noodle: selectedNoodle,
-        qty: quantity,
-        timestamp: Date.now()
-      };
-      const orders = getOrders();
-      orders.push(order);
-      saveOrders(orders);
-      
-      // Show BIG toast
-      showBigToast(selectedSize, selectedNoodle, quantity);
-      
-      // If admin is visible, refresh it
-      if (adminPanel.classList.contains('active')) {
-        renderAdminOrders();
-      }
-    });
-
-    // === ADMIN FUNCTIONS ===
-    function renderAdminOrders() {
-      const orders = getOrders();
-      const total = orders.length;
-      const totalItems = orders.reduce((sum, o) => sum + (o.qty || 1), 0);
-
-      totalOrdersEl.textContent = total;
-      totalItemsEl.textContent = totalItems;
-      orderCountBadge.textContent = total;
-
-      orderList.innerHTML = '';
-      if (total === 0) {
-        orderList.innerHTML = `<div class="empty-msg"><i class="fas fa-inbox"></i> ยังไม่มีออเดอร์</div>`;
-        return;
-      }
-
-      const reversed = [...orders].reverse();
-      reversed.forEach((ord) => {
-        const div = document.createElement('div');
-        div.className = 'order-item';
-        const size = ord.size || 'กลาง';
-        const noodle = ord.noodle || 'เส้นปกติ';
-        const qty = ord.qty || 1;
-        const price = ord.price || 55;
-        const totalPrice = qty * price;
-        const time = new Date(ord.timestamp || Date.now());
-        const timeStr = time.toLocaleString('th-TH', { 
-          hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric'
-        });
-
-        div.innerHTML = `
-          <div class="info">
-            <div class="main">${size} · ${noodle} <span style="font-weight:400; font-size:0.85rem; color:#7a6454;">x${qty}</span></div>
-            <div class="sub">
-              <span>💰 ${totalPrice} ฿</span>
-              <span class="tag">${size}</span>
-              <span class="tag">${noodle}</span>
-            </div>
+function renderOrders(orders){
+  const listEl = document.getElementById('ordersList');
+  if(orders.length === 0){
+    listEl.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์เข้ามา</div>';
+    return;
+  }
+  listEl.innerHTML = orders.map(o => {
+    const time = new Date(o.time).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+    const itemsHtml = o.items.map(it => `<div><span>${it.size} × ${it.qty}</span><span>${it.lineTotal} ฿</span></div>`).join('');
+    return `
+      <div class="order-card status-${o.status}">
+        <div class="order-top">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-time">${time}</div>
+            ${o.table ? `<div class="order-table">${escapeHtml(o.table)}</div>` : ''}
           </div>
-          <div class="time"><i class="far fa-clock"></i> ${timeStr}</div>
-        `;
-        orderList.appendChild(div);
-      });
+        </div>
+        <div class="order-items">${itemsHtml}</div>
+        ${o.note ? `<div class="order-note">หมายเหตุ: ${escapeHtml(o.note)}</div>` : ''}
+        <div class="order-total">รวม ${o.total} ฿</div>
+        <div class="order-actions">
+          <button class="btn-new" onclick="setStatus('${o.id}','new')">ใหม่</button>
+          <button class="btn-preparing" onclick="setStatus('${o.id}','preparing')">กำลังทำ</button>
+          <button class="btn-done" onclick="setStatus('${o.id}','done')">เสร็จแล้ว</button>
+          <button class="btn-quiet" onclick="deleteOrder('${o.id}')">ลบ</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function setStatus(id, status){
+  try{
+    await ordersRef.doc(id).update({ status });
+  }catch(e){ console.error(e); }
+}
+
+async function deleteOrder(id){
+  if(!confirm('ลบออเดอร์นี้หรือไม่?')) return;
+  try{
+    await ordersRef.doc(id).delete();
+  }catch(e){ console.error(e); }
+}
+
+// ---------------- ROUTER ----------------
+function route(){
+  const isAdmin = window.location.hash === '#admin';
+  document.body.classList.toggle('admin-mode', isAdmin);
+  document.getElementById('customerView').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('adminView').style.display = isAdmin ? 'block' : 'none';
+  if(isAdmin){
+    if(sessionStorage.getItem('kj_admin_ok') === '1'){
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      initAdmin();
+    }else{
+      document.getElementById('pinScreen').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
     }
-
-    function clearAllOrders() {
-      if (confirm('⚠️ ล้างออเดอร์ทั้งหมดใช่ไหม?')) {
-        saveOrders([]);
-        renderAdminOrders();
-      }
-    }
-
-    // === VIEW SWITCHING ===
-    function showCustomerView() {
-      customerView.classList.remove('hidden');
-      adminPanel.classList.remove('active');
-      if (adminInterval) {
-        clearInterval(adminInterval);
-        adminInterval = null;
-      }
-      if (window.location.hash === '#admin') {
-        history.pushState(null, null, ' ');
-      }
-    }
-
-    function showAdminView() {
-      customerView.classList.add('hidden');
-      adminPanel.classList.add('active');
-      renderAdminOrders();
-      if (!adminInterval) {
-        adminInterval = setInterval(renderAdminOrders, 5000);
-      }
-      if (window.location.hash !== '#admin') {
-        history.pushState(null, null, '#admin');
-      }
-    }
-
-    function checkHash() {
-      if (window.location.hash === '#admin') {
-        showAdminView();
-      } else {
-        showCustomerView();
-      }
-    }
-
-    // === EVENT LISTENERS ===
-    refreshBtn.addEventListener('click', renderAdminOrders);
-    clearBtn.addEventListener('click', clearAllOrders);
-    backBtn.addEventListener('click', showCustomerView);
-
-    window.addEventListener('hashchange', function() {
-      if (window.location.hash === '#admin') {
-        showAdminView();
-      } else {
-        showCustomerView();
-      }
-    });
-
-    // === INIT ===
-    updateQtyDisplay();
-    checkHash();
-
-    console.log('🍜 กวยจั๊บ อูบล พร้อมสั่ง!');
-    console.log('🔑 Admin: เพิ่ม #admin ต่อท้าย URL');
-  })();
+  }else{
+    if(window._kjUnsub) window._kjUnsub();
+  }
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('DOMContentLoaded', route);
 </script>
 </body>
 </html>
