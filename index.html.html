@@ -54,4 +54,534 @@
     padding:38px 24px 24px;
     text-align:center;
     position:relative;
-    background: linear-gradient(160deg, rgba(255,86,48,0.18),
+    background: linear-gradient(160deg, rgba(255,86,48,0.18), rgba(255,184,51,0.08) 60%, transparent 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:10px;
+  }
+  h1.shop{
+    font-family:'Mitr', sans-serif; font-weight:700;
+    font-size:38px; margin:0; line-height:1.15;
+    background: linear-gradient(90deg, #ff8a5c, #ffb833 45%, #ff5630);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .shop-sub{
+    margin-top:8px; color:var(--text-soft); font-size:14.5px;
+  }
+
+  .hero{
+    display:flex; justify-content:center; padding:14px 0 6px;
+  }
+  .bowl-hero{ width:180px; height:auto; }
+  @keyframes rise{
+    0%{ transform:translateY(0) scaleX(1); opacity:0.55; }
+    50%{ transform:translateY(-14px) scaleX(1.15); opacity:0.15;}
+    100%{ transform:translateY(-30px) scaleX(0.9); opacity:0;}
+  }
+  .steam{ transform-origin:bottom center; animation: rise 3.2s ease-in-out infinite; }
+  .steam.s2{ animation-delay:0.9s; }
+  .steam.s3{ animation-delay:1.7s; }
+
+  section.menu{ padding:18px 20px 0; }
+  .menu-title{
+    font-family:'Mitr', sans-serif; font-size:15px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--gold); margin:0 0 14px 4px;
+  }
+
+  .size-card{
+    display:flex; align-items:center; gap:14px;
+    background: linear-gradient(135deg, var(--broth-2), rgba(61,29,44,0.6));
+    border:1px solid var(--line);
+    border-left: 4px solid var(--accent, var(--chili));
+    border-radius: var(--radius);
+    padding:14px 16px; margin-bottom:12px;
+  }
+  .bowl-icon{ flex:0 0 auto; }
+  .size-info{ flex:1; min-width:0; }
+  .size-name{ font-family:'Mitr'; font-weight:600; font-size:18px; color:var(--cream-2); }
+  .size-desc{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+  .size-price{ font-size:14px; color:var(--accent, var(--gold)); margin-top:6px; font-weight:700; }
+
+  .stepper{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .stepper button{
+    width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--cream);
+    font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.15s, transform 0.1s;
+  }
+  .stepper button:active{ transform:scale(0.9); }
+  .stepper button.plus{ background:var(--accent, var(--chili)); border-color:var(--accent, var(--chili)); color:#1c0e16; font-weight:700; }
+  .stepper .qty{ width:20px; text-align:center; font-weight:600; font-family:'Mitr'; color:var(--accent, var(--cream)); }
+
+  .fields{ padding:22px 20px 0; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; color:var(--text-soft); margin-bottom:6px; letter-spacing:0.03em; }
+  .field input, .field textarea{
+    width:100%; background:var(--broth-2); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; color:var(--cream-2); font-family:'Sarabun';
+    font-size:15px; outline:none;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--gold); }
+  .field textarea{ resize:vertical; min-height:56px; }
+
+  .cartbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:5;
+    background: linear-gradient(180deg, var(--broth-2), #241019);
+    border-top:1px solid var(--line);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+  }
+  .cartbar-inner{ max-width:560px; margin:0 auto; display:flex; align-items:center; gap:14px; }
+  .cart-total{ flex:0 0 auto; }
+  .cart-total .label{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.1em; }
+  .cart-total .amt{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--gold); }
+  .order-btn{
+    flex:1; background: linear-gradient(90deg, var(--chili), #ff8a5c); color:#1c0e16; border:none; border-radius:14px;
+    padding:15px 18px; font-family:'Mitr'; font-weight:700; font-size:16px; cursor:pointer;
+    transition:transform 0.1s, background 0.15s;
+  }
+  .order-btn:active{ transform:scale(0.98); }
+  .order-btn:disabled{ background:#4a3a30; color:var(--text-soft); cursor:not-allowed; }
+
+  .modal-veil{
+    position:fixed; inset:0; background:rgba(10,7,5,0.72); z-index:10;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-veil.show{ display:flex; }
+  .modal{
+    background:var(--cream-2); color:var(--broth); border-radius:20px; padding:30px 26px;
+    max-width:360px; width:100%; text-align:center;
+  }
+  .modal .num{
+    font-family:'Mitr'; font-weight:700; font-size:34px; color:var(--chili); margin:10px 0 4px;
+  }
+  .modal .close-btn{
+    margin-top:20px; background:var(--broth); color:var(--cream-2); border:none;
+    border-radius:12px; padding:12px 20px; font-family:'Mitr'; font-weight:600; cursor:pointer; width:100%;
+  }
+
+  .empty-note{ text-align:center; color:var(--text-soft); font-size:13px; padding:6px 20px 0;}
+
+  body.admin-mode{ background:#100c09; }
+  .admin-wrap{ max-width:720px; margin:0 auto; padding:26px 18px 60px; position:relative; z-index:1; }
+  .admin-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:10px; flex-wrap:wrap;}
+  .admin-header h1{ font-family:'Mitr'; font-size:22px; margin:0; color:var(--cream-2);}
+  .admin-header .sub{ color:var(--text-soft); font-size:12.5px; }
+  .btn-ghost{
+    background:transparent; border:1px solid var(--teal); color:var(--teal);
+    border-radius:10px; padding:9px 14px; font-family:'Sarabun'; font-size:13px; cursor:pointer;
+  }
+  .btn-ghost:hover{ background:var(--teal); color:#0c1a1e; }
+
+  .pin-screen{ max-width:320px; margin:80px auto; text-align:center; }
+  .pin-screen input{
+    width:100%; text-align:center; letter-spacing:0.5em; font-size:22px;
+    background:var(--broth-2); border:1px solid var(--line); border-radius:12px;
+    padding:14px; color:var(--cream-2); margin-top:16px; font-family:'Mitr';
+  }
+  .pin-screen button{
+    margin-top:14px; width:100%; background: linear-gradient(90deg, var(--chili), #ff8a5c); color:#1c0e16; border:none;
+    border-radius:12px; padding:13px; font-family:'Mitr'; font-weight:700; cursor:pointer;
+  }
+  .pin-error{ color:var(--chili); font-size:12.5px; margin-top:10px; min-height:16px; }
+
+  .qr-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:16px;
+    padding:18px; display:flex; gap:16px; align-items:center; margin-bottom:22px; flex-wrap:wrap;
+  }
+  .qr-card canvas{ border-radius:10px; background:#fff; padding:6px; }
+  .qr-card .link-text{ font-size:12px; color:var(--text-soft); word-break:break-all; margin-top:6px; }
+  .qr-card .qr-title{ font-family:'Mitr'; font-size:14px; color:var(--gold); margin-bottom:4px;}
+
+  .stat-row{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat{
+    flex:1; min-width:100px; background:var(--broth-2); border:1px solid var(--line);
+    border-top: 3px solid var(--accent, var(--gold));
+    border-radius:12px; padding:12px 14px;
+  }
+  .stat .n{ font-family:'Mitr'; font-weight:700; font-size:22px; color:var(--accent, var(--cream-2)); }
+  .stat .l{ font-size:11px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.08em; }
+
+  .order-card{
+    background:var(--broth-2); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:12px; position:relative;
+  }
+  .order-card.status-new{ border-left:4px solid #ff5630; }
+  .order-card.status-preparing{ border-left:4px solid #ffb833; }
+  .order-card.status-done{ border-left:4px solid #4ecca3; opacity:0.65; }
+  .order-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .order-id{ font-family:'Mitr'; font-weight:600; font-size:15px; color:var(--cream-2); }
+  .order-time{ font-size:11.5px; color:var(--text-soft); margin-top:2px;}
+  .order-table{ font-size:13px; color:var(--gold); margin-top:4px; }
+  .order-items{ margin:10px 0; font-size:14px; }
+  .order-items div{ display:flex; justify-content:space-between; padding:3px 0; color:var(--cream); }
+  .order-note{ font-size:12.5px; color:var(--text-soft); font-style:italic; margin-top:6px; }
+  .order-total{ font-family:'Mitr'; font-weight:700; color:var(--gold); font-size:16px; text-align:right; margin-top:8px; }
+  .order-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .order-actions button{
+    flex:1; border:none; border-radius:9px; padding:9px 10px; font-size:12.5px; font-family:'Sarabun'; cursor:pointer;
+  }
+  .btn-new{ background:#ff5630; color:#1c0e16; font-weight:600; }
+  .btn-preparing{ background:#ffb833; color:#241a0c; font-weight:600; }
+  .btn-done{ background:#4ecca3; color:#0c241b; font-weight:600; }
+  .btn-quiet{ background:transparent; border:1px solid var(--line) !important; color:var(--text-soft); }
+
+  .no-orders{ text-align:center; color:var(--text-soft); padding:60px 20px; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ================= CUSTOMER VIEW ================= -->
+<div id="customerView">
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow">ร้านริมทาง · สั่งผ่านมือถือ</div>
+      <h1 class="shop">กวยจั๊บZEEDZอุบล</h1>
+      <div class="shop-sub">น้ำซุปพริกไทยเข้มข้น หมูสามชั้นนุ่ม เส้นม้วนทุกวัน</div>
+    </header>
+
+    <div class="hero">
+      <svg class="bowl-hero" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="128" rx="72" ry="14" fill="#000" opacity="0.25"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="#fff3e6"/>
+        <path d="M28 78 Q28 128 100 128 Q172 128 172 78 Z" fill="none" stroke="#ffb833" stroke-width="2" opacity="0.5"/>
+        <ellipse cx="100" cy="78" rx="72" ry="16" fill="#c23a1a"/>
+        <ellipse cx="100" cy="76" rx="72" ry="16" fill="#ff5630"/>
+        <ellipse cx="70" cy="72" rx="5" ry="3" fill="#ffb833" opacity="0.85"/>
+        <ellipse cx="118" cy="80" rx="6" ry="3.5" fill="#4ecca3" opacity="0.75"/>
+        <ellipse cx="95" cy="68" rx="4" ry="2.5" fill="#fff3e6" opacity="0.6"/>
+        <ellipse cx="140" cy="70" rx="4" ry="2.5" fill="#22b8cf" opacity="0.7"/>
+        <g stroke-width="2.6" stroke-linecap="round" fill="none" opacity="0.9">
+          <path class="steam s1" stroke="#ff8a5c" d="M75 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s2" stroke="#ffb833" d="M100 58 q-6 -14 2 -22 q6 -8 0 -18"/>
+          <path class="steam s3" stroke="#4ecca3" d="M125 60 q-6 -14 2 -22 q6 -8 0 -18"/>
+        </g>
+      </svg>
+    </div>
+
+    <section class="menu">
+      <div class="menu-title">เลือกขนาด</div>
+      <div id="sizeList"></div>
+    </section>
+
+    <div class="fields">
+      <div class="field">
+        <label>ชื่อ</label>
+        <input id="custName" type="text" placeholder="เช่น คุณเอ หรือ CK">
+      </div>
+      <div class="field">
+        <label>หมายเหตุ (ถ้ามี)</label>
+        <textarea id="custNote" placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย"></textarea>
+      </div>
+    </div>
+    <div class="empty-note" id="emptyNote">เลือกอย่างน้อย 1 ขนาดเพื่อสั่งอาหาร</div>
+  </div>
+
+  <div class="cartbar">
+    <div class="cartbar-inner">
+      <div class="cart-total">
+        <div class="label">ยอดรวม</div>
+        <div class="amt" id="cartTotal">0 ฿</div>
+      </div>
+      <button class="order-btn" id="orderBtn" disabled>สั่งอาหาร</button>
+    </div>
+  </div>
+
+  <div class="modal-veil" id="modalVeil">
+    <div class="modal">
+      <div style="font-size:13px;color:#8a7a68;">รับออเดอร์แล้ว</div>
+      <div class="num" id="modalOrderNum">#0000</div>
+      <div style="font-size:14px;">กรุณารอเรียกที่โต๊ะ / จุดรับอาหาร</div>
+      <button class="close-btn" onclick="closeModal()">สั่งเพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADMIN VIEW ================= -->
+<div id="adminView" style="display:none;">
+  <div id="pinScreen" class="pin-screen">
+    <div style="font-family:'Mitr';font-size:20px;color:#f4ead9;">รหัสผ่านร้าน</div>
+    <div style="color:#8a7a68;font-size:13px;margin-top:6px;">สำหรับเจ้าของร้านเท่านั้น</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+    <button onclick="checkPin()">เข้าสู่ระบบ</button>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+
+  <div id="dashboard" class="admin-wrap" style="display:none;">
+    <div class="admin-header">
+      <div>
+        <h1>ออเดอร์วันนี้</h1>
+        <div class="sub">อัปเดตอัตโนมัติทุก 6 วินาที</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" onclick="loadOrders()">รีเฟรช</button>
+        <button class="btn-ghost" onclick="window.location.hash=''; window.location.reload();">ไปหน้าลูกค้า</button>
+      </div>
+    </div>
+
+    <div class="qr-card">
+      <canvas id="qrCanvas" width="120" height="120"></canvas>
+      <div>
+        <div class="qr-title">QR สำหรับลูกค้า</div>
+        <div style="font-size:13px;color:#c9c0b3;">ให้ลูกค้าสแกน หรือส่งลิงก์นี้</div>
+        <div class="link-text" id="custLink"></div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat" style="--accent:#ff5630"><div class="n" id="statNew">0</div><div class="l">ใหม่</div></div>
+      <div class="stat" style="--accent:#ffb833"><div class="n" id="statPreparing">0</div><div class="l">กำลังทำ</div></div>
+      <div class="stat" style="--accent:#4ecca3"><div class="n" id="statDone">0</div><div class="l">เสร็จแล้ว</div></div>
+      <div class="stat" style="--accent:#22b8cf"><div class="n" id="statRevenue">0 ฿</div><div class="l">ยอดขายวันนี้</div></div>
+    </div>
+
+    <div id="ordersList"></div>
+  </div>
+</div>
+
+<script>
+// ---------------- CONFIG ----------------
+const SIZES = [
+  { id:'s', name:'เล็ก',  desc:'อิ่มพอดี เหมาะทานเล่น',      price:40 },
+  { id:'m', name:'กลาง', desc:'ขนาดมาตรฐาน ที่นิยมสั่ง',      price:50 },
+  { id:'l', name:'ใหญ่', desc:'จุใจ เนื้อ+เส้นเต็มชาม',        price:60 },
+];
+const ADMIN_PIN = '2100'; // <-- เปลี่ยนรหัสผ่านร้านตรงนี้
+
+// ----- Firebase config -----
+const firebaseConfig = {
+  apiKey: "AIzaSyCW4O2O5_X7C7XdiPlaiKfdxM1v-lo-7b8",
+  authDomain: "kuayjub-f46c4.firebaseapp.com",
+  projectId: "kuayjub-f46c4",
+  storageBucket: "kuayjub-f46c4.firebasestorage.app",
+  messagingSenderId: "147950947076",
+  appId: "1:147950947076:web:70b37699579725fbbade51"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ordersRef = db.collection('orders');
+
+// ---------------- helpers ----------------
+function bowlIcon(scale, color){
+  const w = 40*scale, h = 28*scale;
+  return `<svg width="${w}" height="${h+8}" viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="20" rx="28" ry="8" fill="${color}"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="#fff3e6"/>
+    <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+  </svg>`;
+}
+
+// ---------------- CUSTOMER LOGIC ----------------
+const cart = {};
+SIZES.forEach(s => cart[s.id] = 0);
+
+function renderSizes(){
+  const el = document.getElementById('sizeList');
+  const scales = {s:0.75, m:1, l:1.25};
+  const accents = {s:'#22b8cf', m:'#ffb833', l:'#ff5630'};
+  el.innerHTML = SIZES.map(s => `
+    <div class="size-card" style="--accent:${accents[s.id]}">
+      <div class="bowl-icon">${bowlIcon(scales[s.id], accents[s.id])}</div>
+      <div class="size-info">
+        <div class="size-name">${s.name}</div>
+        <div class="size-desc">${s.desc}</div>
+        <div class="size-price">${s.price} ฿</div>
+      </div>
+      <div class="stepper">
+        <button onclick="changeQty('${s.id}', -1)">−</button>
+        <div class="qty" id="qty-${s.id}">0</div>
+        <button class="plus" onclick="changeQty('${s.id}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQty(id, delta){
+  cart[id] = Math.max(0, (cart[id]||0) + delta);
+  document.getElementById('qty-'+id).textContent = cart[id];
+  updateCartBar();
+}
+
+function updateCartBar(){
+  let total = 0, count = 0;
+  SIZES.forEach(s => { total += cart[s.id]*s.price; count += cart[s.id]; });
+  document.getElementById('cartTotal').textContent = total + ' ฿';
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = count === 0;
+  document.getElementById('emptyNote').style.display = count === 0 ? 'block' : 'none';
+}
+
+async function placeOrder(){
+  const items = SIZES.filter(s => cart[s.id] > 0).map(s => ({
+    size: s.name, sizeId: s.id, qty: cart[s.id], price: s.price, lineTotal: cart[s.id]*s.price
+  }));
+  if(items.length === 0) return;
+
+  const total = items.reduce((a,b)=>a+b.lineTotal,0);
+  const orderId = Date.now().toString(36).slice(-5).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase();
+  const order = {
+    id: orderId,
+    time: new Date().toISOString(),
+    table: document.getElementById('custName').value.trim(),
+    note: document.getElementById('custNote').value.trim(),
+    items, total,
+    status: 'new'
+  };
+
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่งออเดอร์...';
+
+  try{
+    await ordersRef.doc(orderId).set(order);
+    document.getElementById('modalOrderNum').textContent = '#'+orderId;
+    document.getElementById('modalVeil').classList.add('show');
+  }catch(e){
+    console.error(e);
+    alert('ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+  }finally{
+    btn.textContent = 'สั่งอาหาร';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalVeil').classList.remove('show');
+  SIZES.forEach(s => { cart[s.id] = 0; document.getElementById('qty-'+s.id).textContent = 0; });
+  document.getElementById('custName').value = '';
+  document.getElementById('custNote').value = '';
+  updateCartBar();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSizes();
+  updateCartBar();
+  document.getElementById('orderBtn').addEventListener('click', placeOrder);
+});
+
+// ---------------- ADMIN LOGIC ----------------
+function checkPin(){
+  const val = document.getElementById('pinInput').value;
+  if(val === ADMIN_PIN){
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    sessionStorage.setItem('kj_admin_ok','1');
+    initAdmin();
+  }else{
+    document.getElementById('pinError').textContent = 'รหัสผ่านไม่ถูกต้อง';
+  }
+}
+
+function initAdmin(){
+  const baseUrl = window.location.href.split('#')[0];
+  document.getElementById('custLink').textContent = baseUrl;
+  try{
+    new QRious({ element: document.getElementById('qrCanvas'), value: baseUrl, size: 108, background:'#fff', foreground:'#1c1410' });
+  }catch(e){}
+
+  const listEl = document.getElementById('ordersList');
+  listEl.innerHTML = '<div class="no-orders">กำลังโหลด...</div>';
+
+  if(window._kjUnsub) window._kjUnsub();
+  window._kjUnsub = ordersRef.orderBy('time','desc').onSnapshot(
+    snapshot => {
+      const orders = snapshot.docs.map(d => d.data());
+      renderOrders(orders);
+      updateStats(orders);
+    },
+    err => {
+      console.error(err);
+      listEl.innerHTML = '<div class="no-orders">โหลดออเดอร์ไม่สำเร็จ ตรวจสอบการตั้งค่า Firebase</div>';
+    }
+  );
+}
+
+function loadOrders(){ initAdmin(); }
+
+function updateStats(orders){
+  const newC = orders.filter(o=>o.status==='new').length;
+  const prepC = orders.filter(o=>o.status==='preparing').length;
+  const doneC = orders.filter(o=>o.status==='done').length;
+  const revenue = orders.reduce((a,o)=>a+(o.total||0),0);
+  document.getElementById('statNew').textContent = newC;
+  document.getElementById('statPreparing').textContent = prepC;
+  document.getElementById('statDone').textContent = doneC;
+  document.getElementById('statRevenue').textContent = revenue + ' ฿';
+}
+
+function renderOrders(orders){
+  const listEl = document.getElementById('ordersList');
+  if(orders.length === 0){
+    listEl.innerHTML = '<div class="no-orders">ยังไม่มีออเดอร์เข้ามา</div>';
+    return;
+  }
+  listEl.innerHTML = orders.map(o => {
+    const time = new Date(o.time).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+    const itemsHtml = o.items.map(it => `<div><span>${it.size} × ${it.qty}</span><span>${it.lineTotal} ฿</span></div>`).join('');
+    return `
+      <div class="order-card status-${o.status}">
+        <div class="order-top">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-time">${time}</div>
+            ${o.table ? `<div class="order-table">${escapeHtml(o.table)}</div>` : ''}
+          </div>
+        </div>
+        <div class="order-items">${itemsHtml}</div>
+        ${o.note ? `<div class="order-note">หมายเหตุ: ${escapeHtml(o.note)}</div>` : ''}
+        <div class="order-total">รวม ${o.total} ฿</div>
+        <div class="order-actions">
+          <button class="btn-new" onclick="setStatus('${o.id}','new')">ใหม่</button>
+          <button class="btn-preparing" onclick="setStatus('${o.id}','preparing')">กำลังทำ</button>
+          <button class="btn-done" onclick="setStatus('${o.id}','done')">เสร็จแล้ว</button>
+          <button class="btn-quiet" onclick="deleteOrder('${o.id}')">ลบ</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function setStatus(id, status){
+  try{
+    await ordersRef.doc(id).update({ status });
+  }catch(e){ console.error(e); }
+}
+
+async function deleteOrder(id){
+  if(!confirm('ลบออเดอร์นี้หรือไม่?')) return;
+  try{
+    await ordersRef.doc(id).delete();
+  }catch(e){ console.error(e); }
+}
+
+// ---------------- ROUTER ----------------
+function route(){
+  const isAdmin = window.location.hash === '#admin';
+  document.body.classList.toggle('admin-mode', isAdmin);
+  document.getElementById('customerView').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('adminView').style.display = isAdmin ? 'block' : 'none';
+  if(isAdmin){
+    if(sessionStorage.getItem('kj_admin_ok') === '1'){
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      initAdmin();
+    }else{
+      document.getElementById('pinScreen').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  }else{
+    if(window._kjUnsub) window._kjUnsub();
+  }
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('DOMContentLoaded', route);
+</script>
+</body>
+</html>
