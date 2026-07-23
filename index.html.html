@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>กวยจั๊บ · อุบล</title>
+  <title>กวยจั๊บ · อูบล</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -22,12 +22,37 @@
     .size-btn span { display: block; font-weight: 400; font-size: 0.7rem; color: #7a6454; margin-top: 2px; }
     .size-btn.active { background: #ffffff; border-color: #b87c5a; box-shadow: 0 6px 14px rgba(184,124,90,0.18); }
     .size-btn.active i { color: #b87c5a; }
+    
+    /* === Noodle Section - Only 2 options === */
     .noodle-section { margin: 18px 0 20px; }
     .noodle-section label { font-weight: 500; color: #3d2c1e; display: block; margin-bottom: 8px; font-size: 0.95rem; }
-    .noodle-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .noodle-opt { background: #f3ebe4; border-radius: 40px; padding: 8px 16px; font-size: 0.85rem; font-weight: 500; color: #2d1f14; cursor: pointer; border: 2px solid transparent; transition: 0.1s; display: flex; align-items: center; gap: 6px; }
-    .noodle-opt i { color: #a4836a; font-size: 0.9rem; }
-    .noodle-opt.active { background: #ffffff; border-color: #b87c5a; box-shadow: 0 2px 8px rgba(184,124,90,0.12); }
+    .noodle-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .noodle-opt { 
+      flex: 1; 
+      min-width: 120px;
+      background: #f3ebe4; 
+      border-radius: 60px; 
+      padding: 14px 20px; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      color: #2d1f14; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      transition: 0.15s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      gap: 10px; 
+      text-align: center;
+    }
+    .noodle-opt i { color: #a4836a; font-size: 1.2rem; }
+    .noodle-opt.active { 
+      background: #ffffff; 
+      border-color: #b87c5a; 
+      box-shadow: 0 4px 12px rgba(184,124,90,0.15); 
+    }
+    .noodle-opt.active i { color: #b87c5a; }
+    
     .qty-row { display: flex; align-items: center; gap: 12px; background: #f3ebe4; padding: 6px 12px 6px 20px; border-radius: 60px; margin: 18px 0 24px; }
     .qty-row label { font-weight: 500; color: #3d2c1e; flex: 1; }
     .qty-control { display: flex; align-items: center; gap: 12px; }
@@ -36,11 +61,83 @@
     .qty-control span { font-size: 1.5rem; font-weight: 600; min-width: 32px; text-align: center; color: #2d1f14; }
     .order-btn { width: 100%; background: #b87c5a; border: none; border-radius: 60px; padding: 18px 12px; font-size: 1.25rem; font-weight: 600; color: white; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.15s; box-shadow: 0 10px 20px rgba(184,124,90,0.28); margin-top: 6px; }
     .order-btn:active { transform: scale(0.97); background: #9e6b4d; }
-    .toast { margin-top: 18px; background: #e3f0e6; border-radius: 40px; padding: 12px 18px; color: #1f4a3a; font-size: 0.9rem; display: none; align-items: center; gap: 10px; border-left: 4px solid #2b7a5a; }
-    .toast.show { display: flex; }
+    
+    /* === BIG TOAST MESSAGE === */
+    .toast-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .toast-overlay.show { display: flex; }
+    
+    .toast-box {
+      background: #fefcf9;
+      border-radius: 60px;
+      padding: 50px 60px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.3);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 3px solid #b87c5a;
+    }
+    .toast-box i { 
+      font-size: 4.5rem; 
+      color: #2b7a5a; 
+      display: block; 
+      margin-bottom: 16px; 
+    }
+    .toast-box .big-text { 
+      font-size: 2.5rem; 
+      font-weight: 700; 
+      color: #2d1f14; 
+      margin-bottom: 8px; 
+    }
+    .toast-box .sub-text { 
+      font-size: 1.3rem; 
+      color: #6f5644; 
+      font-weight: 500; 
+    }
+    .toast-box .order-detail {
+      font-size: 1.1rem;
+      color: #7a6454;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #f5ede7;
+      border-radius: 40px;
+      display: inline-block;
+    }
+    .toast-close-btn {
+      margin-top: 24px;
+      background: #b87c5a;
+      border: none;
+      border-radius: 60px;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .toast-close-btn:active { transform: scale(0.95); background: #9e6b4d; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
     .footer-note { margin-top: 16px; font-size: 0.65rem; color: #b8a494; text-align: center; }
     
-    /* === Admin View (hidden by default, shown via #admin) === */
+    /* === Admin View === */
     .admin-panel { display: none; max-width: 700px; width: 100%; background: #fcf8f4; border-radius: 40px; padding: 30px 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.15); border: 1px solid #4a3728; }
     .admin-panel.active { display: block; }
     .customer-view { display: block; }
@@ -67,14 +164,10 @@
     .btn { background: #f0e8e0; border: none; border-radius: 60px; padding: 10px 24px; font-weight: 500; color: #2d1f14; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.1s; font-size: 0.9rem; }
     .btn:active { transform: scale(0.96); }
     .btn-danger { background: #d4b8a8; color: #3d241a; }
-    .btn-danger:hover { background: #c4a08a; }
     .btn-primary { background: #b87c5a; color: white; }
-    .btn-primary:hover { background: #a06b4c; }
     .refresh-note { margin-top: 16px; font-size: 0.7rem; color: #8a7564; text-align: center; }
     .admin-back-btn { margin-top: 20px; text-align: center; }
     .admin-back-btn .btn { background: #e8ddd2; }
-    
-    /* Secret admin hint (only visible to you) */
     .admin-hint { position: fixed; bottom: 10px; right: 10px; font-size: 0.5rem; color: rgba(0,0,0,0.08); pointer-events: none; user-select: none; }
     
     @media (max-width: 480px) { 
@@ -82,6 +175,11 @@
       .size-btn { min-width: 68px; font-size: 0.9rem; }
       .admin-panel { padding: 20px 16px; }
       .admin-header h1 { font-size: 1.4rem; }
+      .toast-box { padding: 30px 24px; }
+      .toast-box .big-text { font-size: 1.8rem; }
+      .toast-box .sub-text { font-size: 1rem; }
+      .toast-box i { font-size: 3.5rem; }
+      .noodle-opt { min-width: 100px; padding: 12px 16px; font-size: 0.9rem; }
     }
   </style>
 </head>
@@ -102,14 +200,12 @@
       <div class="size-btn" data-size="ใหญ่" data-price="65"><i class="fas fa-wine-bottle"></i> ใหญ่ <span>65 ฿</span></div>
     </div>
 
+    <!-- === Only 2 Noodle Options === -->
     <div class="noodle-section">
       <label><i class="fas fa-seedling" style="margin-right: 8px; color:#a4836a;"></i>เลือกเส้น</label>
       <div class="noodle-grid" id="noodleGrid">
-        <div class="noodle-opt active" data-noodle="เส้นไข่ผำ"><i class="fas fa-egg"></i> เส้นไข่ผำ</div>
-        <div class="noodle-opt" data-noodle="เส้นบีดรูท"><i class="fas fa-carrot"></i> เส้นบีดรูท</div>
+        <div class="noodle-opt active" data-noodle="เส้นปกติ"><i class="fas fa-utensils"></i> เส้นปกติ</div>
         <div class="noodle-opt" data-noodle="เส้นบุก"><i class="fas fa-leaf"></i> เส้นบุก</div>
-        <div class="noodle-opt" data-noodle="สไปรูไรน่า"><i class="fas fa-spa"></i> สไปรูไรน่า</div>
-        <div class="noodle-opt" data-noodle="ไรเบอร์รี่"><i class="fas fa-berry"></i> ไรเบอร์รี่</div>
       </div>
     </div>
 
@@ -124,11 +220,18 @@
 
     <button class="order-btn" id="orderBtn"><i class="fas fa-bowl-food"></i> สั่งเลย</button>
 
-    <div id="toastMessage" class="toast">
-      <i class="fas fa-check-circle"></i> <span id="toastText">ออเดอร์แล้ว!</span>
-    </div>
-
     <div class="footer-note"><i class="fas fa-qrcode"></i> สแกนสั่ง · ออเดอร์เก็บในเครื่องคุณ</div>
+  </div>
+</div>
+
+<!-- ===== BIG TOAST OVERLAY ===== -->
+<div id="toastOverlay" class="toast-overlay">
+  <div class="toast-box">
+    <i class="fas fa-check-circle"></i>
+    <div class="big-text">✅ สั่งแล้ว!</div>
+    <div class="sub-text">ขอบคุณที่สั่งอาหารค่ะ</div>
+    <div class="order-detail" id="orderDetail">กลาง · เส้นปกติ x1</div>
+    <button class="toast-close-btn" id="toastCloseBtn">ตกลง</button>
   </div>
 </div>
 
@@ -159,13 +262,13 @@
   </div>
 </div>
 
-<!-- Secret hint (only visible to you) -->
+<!-- Secret hint -->
 <div class="admin-hint">🔑 #admin</div>
 
 <script>
   (function() {
     // === STATE ===
-    let selectedSize = 'กลาง', selectedPrice = 55, selectedNoodle = 'เส้นไข่ผำ', quantity = 1;
+    let selectedSize = 'กลาง', selectedPrice = 55, selectedNoodle = 'เส้นปกติ', quantity = 1;
     let adminInterval = null;
 
     // === DOM REFS ===
@@ -177,8 +280,9 @@
     const qtyDec = document.getElementById('qtyDec');
     const qtyInc = document.getElementById('qtyInc');
     const orderBtn = document.getElementById('orderBtn');
-    const toastMsg = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
+    const toastOverlay = document.getElementById('toastOverlay');
+    const toastCloseBtn = document.getElementById('toastCloseBtn');
+    const orderDetail = document.getElementById('orderDetail');
     const orderList = document.getElementById('orderList');
     const totalOrdersEl = document.getElementById('totalOrders');
     const totalItemsEl = document.getElementById('totalItems');
@@ -214,6 +318,27 @@
     qtyDec.addEventListener('click', function() { if (quantity > 1) { quantity--; updateQtyDisplay(); } });
     qtyInc.addEventListener('click', function() { if (quantity < 99) { quantity++; updateQtyDisplay(); } });
 
+    // === SHOW BIG TOAST ===
+    function showBigToast(size, noodle, qty) {
+      orderDetail.textContent = `${size} · ${noodle} x${qty}`;
+      toastOverlay.classList.add('show');
+      // Auto close after 4 seconds
+      setTimeout(() => {
+        toastOverlay.classList.remove('show');
+      }, 4000);
+    }
+
+    toastCloseBtn.addEventListener('click', function() {
+      toastOverlay.classList.remove('show');
+    });
+
+    // Close toast when clicking outside the box
+    toastOverlay.addEventListener('click', function(e) {
+      if (e.target === toastOverlay) {
+        toastOverlay.classList.remove('show');
+      }
+    });
+
     orderBtn.addEventListener('click', function() {
       const order = {
         size: selectedSize,
@@ -225,9 +350,9 @@
       const orders = getOrders();
       orders.push(order);
       saveOrders(orders);
-      toastText.innerText = `สั่ง ${selectedSize} · ${selectedNoodle} x${quantity} เรียบร้อย!`;
-      toastMsg.classList.add('show');
-      setTimeout(() => { toastMsg.classList.remove('show'); }, 2800);
+      
+      // Show BIG toast
+      showBigToast(selectedSize, selectedNoodle, quantity);
       
       // If admin is visible, refresh it
       if (adminPanel.classList.contains('active')) {
@@ -256,7 +381,7 @@
         const div = document.createElement('div');
         div.className = 'order-item';
         const size = ord.size || 'กลาง';
-        const noodle = ord.noodle || 'เส้นไข่ผำ';
+        const noodle = ord.noodle || 'เส้นปกติ';
         const qty = ord.qty || 1;
         const price = ord.price || 55;
         const totalPrice = qty * price;
@@ -295,7 +420,6 @@
         clearInterval(adminInterval);
         adminInterval = null;
       }
-      // Remove #admin from URL without reloading
       if (window.location.hash === '#admin') {
         history.pushState(null, null, ' ');
       }
@@ -308,13 +432,11 @@
       if (!adminInterval) {
         adminInterval = setInterval(renderAdminOrders, 5000);
       }
-      // Add #admin to URL without reloading
       if (window.location.hash !== '#admin') {
         history.pushState(null, null, '#admin');
       }
     }
 
-    // === CHECK URL ON LOAD ===
     function checkHash() {
       if (window.location.hash === '#admin') {
         showAdminView();
@@ -328,7 +450,6 @@
     clearBtn.addEventListener('click', clearAllOrders);
     backBtn.addEventListener('click', showCustomerView);
 
-    // Listen for hash changes (if user manually types #admin)
     window.addEventListener('hashchange', function() {
       if (window.location.hash === '#admin') {
         showAdminView();
