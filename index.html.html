@@ -255,7 +255,7 @@
 <div id="customerView">
   <div class="wrap">
     <header class="top">
-      <div class="eyebrow">สั่งผ่านมือถือ</div>
+      <div class="eyebrow">ร้านริมทาง · สั่งผ่านมือถือ</div>
       <h1 class="shop">กวยจั๊บZEEDZอุบล</h1>
       <div class="shop-sub">น้ำซุปพริกไทยเข้มข้น หมูสามชั้นนุ่ม เส้นม้วนทุกวัน</div>
     </header>
@@ -289,12 +289,6 @@
       <div id="toppingList"></div>
     </section>
 
-    <div class="fields">
-      <div class="field">
-        <label>ชื่อ</label>
-        <input id="custName" type="text" placeholder="ชื่อ">
-      </div>
-    </div>
   </div>
 
   <div class="cartbar">
@@ -310,9 +304,8 @@
   <div class="modal-veil" id="modalVeil">
     <div class="modal">
       <div style="font-size:13px;color:#8a7a68;">รับออเดอร์แล้ว</div>
-      <div class="num" id="modalOrderNum">#0000</div>
-      <div style="font-size:14px;">กรุณารอเรียกที่โต๊ะ / จุดรับอาหาร</div>
-      <button class="close-btn" onclick="closeModal()">สั่งเพิ่ม</button>
+      <div class="num" id="modalOrderNum">Z000</div>
+      <div style="font-size:14px;">กรุณารอเรียกคิวที่จุดรับอาหาร</div>
     </div>
   </div>
 </div>
@@ -459,51 +452,51 @@ function updateCartBar(){
   document.getElementById('cartTotal').textContent = total + ' ฿';
 }
 
+async function getNextQueueCode(){
+  const counterRef = db.collection('counters').doc('queue');
+  const next = await db.runTransaction(async (t) => {
+    const doc = await t.get(counterRef);
+    const current = doc.exists ? (doc.data().count || 0) : 0;
+    const n = current + 1;
+    t.set(counterRef, { count: n }, { merge: true });
+    return n;
+  });
+  return 'Z' + String(next).padStart(3, '0');
+}
+
 async function placeOrder(){
   const removed = TOPPINGS.filter(t => toppingState[t.id] === 'none').map(t => t.name);
   const extra = TOPPINGS.filter(t => toppingState[t.id] === 'extra').map(t => t.name);
   const addonsTotal = extra.length * ADDON_PRICE;
   const total = qty * ITEM.price + addonsTotal;
 
-  const orderId = Date.now().toString(36).slice(-5).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase();
-  const order = {
-    id: orderId,
-    time: new Date().toISOString(),
-    table: document.getElementById('custName').value.trim(),
-    qty,
-    itemName: ITEM.name,
-    itemPrice: ITEM.price,
-    removed,
-    extra,
-    addonsTotal,
-    total,
-    status: 'new'
-  };
-
   const btn = document.getElementById('orderBtn');
   btn.disabled = true;
   btn.textContent = 'กำลังส่งออเดอร์...';
 
   try{
-    await ordersRef.doc(orderId).set(order);
-    document.getElementById('modalOrderNum').textContent = '#'+orderId;
+    const queueCode = await getNextQueueCode();
+    const order = {
+      id: queueCode,
+      time: new Date().toISOString(),
+      qty,
+      itemName: ITEM.name,
+      itemPrice: ITEM.price,
+      removed,
+      extra,
+      addonsTotal,
+      total,
+      status: 'new'
+    };
+    await ordersRef.doc(queueCode).set(order);
+    document.getElementById('modalOrderNum').textContent = queueCode;
     document.getElementById('modalVeil').classList.add('show');
   }catch(e){
     console.error(e);
     alert('ส่งออเดอร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-  }finally{
     btn.textContent = 'สั่งอาหาร';
+    btn.disabled = false;
   }
-}
-
-function closeModal(){
-  document.getElementById('modalVeil').classList.remove('show');
-  qty = 1;
-  TOPPINGS.forEach(t => toppingState[t.id] = 'normal');
-  document.getElementById('custName').value = '';
-  renderItem();
-  renderToppings();
-  updateCartBar();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -578,9 +571,8 @@ function renderOrders(orders){
       <div class="order-card status-${o.status}">
         <div class="order-top">
           <div>
-            <div class="order-id">#${o.id}</div>
+            <div class="order-id">คิว ${o.id}</div>
             <div class="order-time">${time}</div>
-            ${o.table ? `<div class="order-table">${escapeHtml(o.table)}</div>` : ''}
           </div>
         </div>
         <div class="order-items">${itemsHtml}</div>
