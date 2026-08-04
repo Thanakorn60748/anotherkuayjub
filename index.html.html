@@ -127,6 +127,23 @@
   .field input:focus, .field textarea:focus{ border-color:var(--gold); }
   .field textarea{ resize:vertical; min-height:56px; }
 
+  .topping-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    background: var(--broth-2); border:1px solid var(--line); border-radius:14px;
+    padding:12px 14px; margin-bottom:10px;
+  }
+  .topping-name{ font-family:'Sarabun'; font-weight:600; font-size:14.5px; color:var(--cream-2); }
+  .topping-hint{ font-size:11px; color:var(--text-soft); margin-top:2px; }
+  .seg{ display:flex; gap:6px; flex:0 0 auto; }
+  .seg-btn{
+    border:1px solid var(--line); background:transparent; color:var(--text-soft);
+    border-radius:8px; padding:6px 10px; font-size:11.5px; font-family:'Sarabun'; cursor:pointer;
+    transition:background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .seg-btn.active-none{ background:#4a3a30; color:var(--cream-2); border-color:#4a3a30; }
+  .seg-btn.active-normal{ background: var(--herb); color:#0c241b; border-color:var(--herb); font-weight:600; }
+  .seg-btn.active-extra{ background: var(--gold); color:#241a0c; border-color:var(--gold); font-weight:600; }
+
   .cartbar{
     position:fixed; left:0; right:0; bottom:0; z-index:5;
     background: linear-gradient(180deg, var(--broth-2), #241019);
@@ -263,8 +280,13 @@
     </div>
 
     <section class="menu">
-      <div class="menu-title">เลือกขนาด</div>
-      <div id="sizeList"></div>
+      <div class="menu-title">จำนวนที่สั่ง</div>
+      <div id="itemCard"></div>
+    </section>
+
+    <section class="menu">
+      <div class="menu-title">เลือกท็อปปิ้ง</div>
+      <div id="toppingList"></div>
     </section>
 
     <div class="fields">
@@ -272,12 +294,7 @@
         <label>ชื่อ</label>
         <input id="custName" type="text" placeholder="เช่น คุณเอ หรือ CK">
       </div>
-      <div class="field">
-        <label>หมายเหตุ (ถ้ามี)</label>
-        <textarea id="custNote" placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย"></textarea>
-      </div>
     </div>
-    <div class="empty-note" id="emptyNote">เลือกอย่างน้อย 1 ขนาดเพื่อสั่งอาหาร</div>
   </div>
 
   <div class="cartbar">
@@ -286,7 +303,7 @@
         <div class="label">ยอดรวม</div>
         <div class="amt" id="cartTotal">0 ฿</div>
       </div>
-      <button class="order-btn" id="orderBtn" disabled>สั่งอาหาร</button>
+      <button class="order-btn" id="orderBtn">สั่งอาหาร</button>
     </div>
   </div>
 
@@ -344,11 +361,17 @@
 
 <script>
 // ---------------- CONFIG ----------------
-const SIZES = [
-  { id:'s', name:'เล็ก',  desc:'อิ่มพอดี เหมาะทานเล่น',      price:40 },
-  { id:'m', name:'กลาง', desc:'ขนาดมาตรฐาน ที่นิยมสั่ง',      price:50 },
-  { id:'l', name:'ใหญ่', desc:'จุใจ เนื้อ+เส้นเต็มชาม',        price:60 },
+const ITEM = { name:'กวยจั๊บ', desc:'น้ำซุปพริกไทยเข้มข้น หมูสามชั้นนุ่ม เส้นม้วนทุกวัน', price:59 };
+const TOPPINGS = [
+  { id:'chicken',    name:'ไก่ฉีก' },
+  { id:'moodeng',    name:'หมูเด้ง' },
+  { id:'mooyor',     name:'หมูยอ' },
+  { id:'chickenleg', name:'น่องไก่' },
+  { id:'egg',        name:'ไข่' },
+  { id:'shallot',    name:'หอมเจียว' },
+  { id:'coriander',  name:'ผักชี' },
 ];
+const ADDON_PRICE = 10;
 const ADMIN_PIN = '2100'; // <-- เปลี่ยนรหัสผ่านร้านตรงนี้
 
 // ----- Firebase config -----
@@ -365,9 +388,8 @@ const db = firebase.firestore();
 const ordersRef = db.collection('orders');
 
 // ---------------- helpers ----------------
-function bowlIcon(scale, color){
-  const w = 40*scale, h = 28*scale;
-  return `<svg width="${w}" height="${h+8}" viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg">
+function bowlIcon(color){
+  return `<svg width="40" height="36" viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="30" cy="20" rx="28" ry="8" fill="${color}"/>
     <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="#fff3e6"/>
     <path d="M4 20 Q4 40 30 40 Q56 40 56 20 Z" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
@@ -375,59 +397,86 @@ function bowlIcon(scale, color){
 }
 
 // ---------------- CUSTOMER LOGIC ----------------
-const cart = {};
-SIZES.forEach(s => cart[s.id] = 0);
+let qty = 1;
+const toppingState = {}; // 'normal' (free, included) | 'none' (removed) | 'extra' (+10฿)
+TOPPINGS.forEach(t => toppingState[t.id] = 'normal');
 
-function renderSizes(){
-  const el = document.getElementById('sizeList');
-  const scales = {s:0.75, m:1, l:1.25};
-  const accents = {s:'#22b8cf', m:'#ffb833', l:'#ff5630'};
-  el.innerHTML = SIZES.map(s => `
-    <div class="size-card" style="--accent:${accents[s.id]}">
-      <div class="bowl-icon">${bowlIcon(scales[s.id], accents[s.id])}</div>
+function renderItem(){
+  const el = document.getElementById('itemCard');
+  el.innerHTML = `
+    <div class="size-card" style="--accent:#ff5630">
+      <div class="bowl-icon">${bowlIcon('#ff5630')}</div>
       <div class="size-info">
-        <div class="size-name">${s.name}</div>
-        <div class="size-desc">${s.desc}</div>
-        <div class="size-price">${s.price} ฿</div>
+        <div class="size-name">${ITEM.name}</div>
+        <div class="size-desc">${ITEM.desc}</div>
+        <div class="size-price">${ITEM.price} ฿ / ชาม</div>
       </div>
       <div class="stepper">
-        <button onclick="changeQty('${s.id}', -1)">−</button>
-        <div class="qty" id="qty-${s.id}">0</div>
-        <button class="plus" onclick="changeQty('${s.id}', 1)">+</button>
+        <button onclick="changeQty(-1)">−</button>
+        <div class="qty" id="qtyMain">${qty}</div>
+        <button class="plus" onclick="changeQty(1)">+</button>
       </div>
     </div>
-  `).join('');
+  `;
 }
 
-function changeQty(id, delta){
-  cart[id] = Math.max(0, (cart[id]||0) + delta);
-  document.getElementById('qty-'+id).textContent = cart[id];
+function changeQty(delta){
+  qty = Math.max(1, qty + delta);
+  document.getElementById('qtyMain').textContent = qty;
+  updateCartBar();
+}
+
+function renderToppings(){
+  const el = document.getElementById('toppingList');
+  el.innerHTML = TOPPINGS.map(t => {
+    const state = toppingState[t.id];
+    const hint = state==='normal' ? 'ใส่ตามปกติ (ฟรี)' : state==='none' ? 'ไม่ใส่' : `ใส่เพิ่ม (+${ADDON_PRICE} ฿)`;
+    return `
+      <div class="topping-row">
+        <div>
+          <div class="topping-name">${t.name}</div>
+          <div class="topping-hint">${hint}</div>
+        </div>
+        <div class="seg">
+          <button class="seg-btn ${state==='none' ? 'active-none' : ''}" onclick="setTopping('${t.id}','none')">ไม่เอา</button>
+          <button class="seg-btn ${state==='normal' ? 'active-normal' : ''}" onclick="setTopping('${t.id}','normal')">ปกติ</button>
+          <button class="seg-btn ${state==='extra' ? 'active-extra' : ''}" onclick="setTopping('${t.id}','extra')">เพิ่ม +${ADDON_PRICE}฿</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setTopping(id, state){
+  toppingState[id] = state;
+  renderToppings();
   updateCartBar();
 }
 
 function updateCartBar(){
-  let total = 0, count = 0;
-  SIZES.forEach(s => { total += cart[s.id]*s.price; count += cart[s.id]; });
+  const addons = TOPPINGS.filter(t => toppingState[t.id] === 'extra').length * ADDON_PRICE;
+  const total = qty * ITEM.price + addons;
   document.getElementById('cartTotal').textContent = total + ' ฿';
-  const btn = document.getElementById('orderBtn');
-  btn.disabled = count === 0;
-  document.getElementById('emptyNote').style.display = count === 0 ? 'block' : 'none';
 }
 
 async function placeOrder(){
-  const items = SIZES.filter(s => cart[s.id] > 0).map(s => ({
-    size: s.name, sizeId: s.id, qty: cart[s.id], price: s.price, lineTotal: cart[s.id]*s.price
-  }));
-  if(items.length === 0) return;
+  const removed = TOPPINGS.filter(t => toppingState[t.id] === 'none').map(t => t.name);
+  const extra = TOPPINGS.filter(t => toppingState[t.id] === 'extra').map(t => t.name);
+  const addonsTotal = extra.length * ADDON_PRICE;
+  const total = qty * ITEM.price + addonsTotal;
 
-  const total = items.reduce((a,b)=>a+b.lineTotal,0);
   const orderId = Date.now().toString(36).slice(-5).toUpperCase() + Math.random().toString(36).slice(2,4).toUpperCase();
   const order = {
     id: orderId,
     time: new Date().toISOString(),
     table: document.getElementById('custName').value.trim(),
-    note: document.getElementById('custNote').value.trim(),
-    items, total,
+    qty,
+    itemName: ITEM.name,
+    itemPrice: ITEM.price,
+    removed,
+    extra,
+    addonsTotal,
+    total,
     status: 'new'
   };
 
@@ -449,14 +498,17 @@ async function placeOrder(){
 
 function closeModal(){
   document.getElementById('modalVeil').classList.remove('show');
-  SIZES.forEach(s => { cart[s.id] = 0; document.getElementById('qty-'+s.id).textContent = 0; });
+  qty = 1;
+  TOPPINGS.forEach(t => toppingState[t.id] = 'normal');
   document.getElementById('custName').value = '';
-  document.getElementById('custNote').value = '';
+  renderItem();
+  renderToppings();
   updateCartBar();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderSizes();
+  renderItem();
+  renderToppings();
   updateCartBar();
   document.getElementById('orderBtn').addEventListener('click', placeOrder);
 });
@@ -519,7 +571,9 @@ function renderOrders(orders){
   }
   listEl.innerHTML = orders.map(o => {
     const time = new Date(o.time).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
-    const itemsHtml = o.items.map(it => `<div><span>${it.size} × ${it.qty}</span><span>${it.lineTotal} ฿</span></div>`).join('');
+    const itemsHtml = `<div><span>${o.itemName || 'กวยจั๊บ'} × ${o.qty}</span><span>${(o.qty*(o.itemPrice||59))} ฿</span></div>`;
+    const removedHtml = (o.removed && o.removed.length) ? `<div class="order-note">ไม่เอา: ${escapeHtml(o.removed.join(', '))}</div>` : '';
+    const extraHtml = (o.extra && o.extra.length) ? `<div class="order-note">เพิ่ม (+${ADDON_PRICE}฿/รายการ): ${escapeHtml(o.extra.join(', '))}</div>` : '';
     return `
       <div class="order-card status-${o.status}">
         <div class="order-top">
@@ -530,7 +584,8 @@ function renderOrders(orders){
           </div>
         </div>
         <div class="order-items">${itemsHtml}</div>
-        ${o.note ? `<div class="order-note">หมายเหตุ: ${escapeHtml(o.note)}</div>` : ''}
+        ${removedHtml}
+        ${extraHtml}
         <div class="order-total">รวม ${o.total} ฿</div>
         <div class="order-actions">
           <button class="btn-new" onclick="setStatus('${o.id}','new')">ใหม่</button>
